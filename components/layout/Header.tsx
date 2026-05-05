@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search, X, Menu, ChevronDown } from "lucide-react";
+import { Search, X, Menu } from "lucide-react";
 import type { Hero } from "@/types";
 
 export default function Header() {
@@ -40,13 +41,15 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-dark-800/95 backdrop-blur border-b border-dark-600">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center">
-            <span className="text-dark-900 font-black text-xs">HOK</span>
-          </div>
-          <span className="font-bold text-white hidden sm:block">
-            HOK <span className="text-gold-400">Builds</span>
-          </span>
+        <Link href="/" className="shrink-0">
+          <Image
+            src="/logo.png"
+            alt="HOK Builds"
+            width={160}
+            height={34}
+            className="h-8 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Nav */}

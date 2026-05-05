@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSession } from "@/lib/auth";
 import { LayoutDashboard, Users, Sword, BarChart2, LogOut } from "lucide-react";
 
@@ -17,14 +18,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Sidebar */}
       <aside className="w-56 bg-dark-800 border-r border-dark-600 flex flex-col shrink-0">
         <div className="p-4 border-b border-dark-600">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center">
-              <span className="text-dark-900 font-black text-xs">HOK</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-white">HOK Builds</p>
-              <p className="text-[10px] text-gray-500">Painel Admin</p>
-            </div>
+          <Link href="/" className="flex flex-col gap-1">
+            <Image src="/logo.png" alt="HOK Builds" width={120} height={26} className="h-6 w-auto object-contain" />
+            <p className="text-[10px] text-gray-500">Painel Admin</p>
           </Link>
         </div>
 

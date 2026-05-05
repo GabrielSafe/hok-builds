@@ -1,15 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
     <footer className="mt-20 border-t border-dark-600 bg-dark-800">
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center">
-              <span className="text-dark-900 font-black text-xs">HOK</span>
-            </div>
-            <span className="font-bold text-white">HOK <span className="text-gold-400">Builds</span></span>
+          <div className="mb-3">
+            <Image src="/logo.png" alt="HOK Builds" width={140} height={30} className="h-7 w-auto object-contain" />
           </div>
           <p className="text-gray-500 text-sm leading-relaxed">
             Guias e builds para todos os heróis de Honor of Kings. Domine o campo de batalha.
