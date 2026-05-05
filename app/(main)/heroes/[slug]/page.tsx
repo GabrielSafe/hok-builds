@@ -11,6 +11,8 @@ import RoleBadge from "@/components/ui/RoleBadge";
 import DifficultyStars from "@/components/ui/DifficultyStars";
 import type { HeroDetail } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 async function getHero(slug: string): Promise<HeroDetail | null> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   const res = await fetch(`${baseUrl}/api/heroes/${slug}`, {

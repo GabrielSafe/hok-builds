@@ -1,4 +1,6 @@
 import { query } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import type { Hero } from "@/types";
 import BuildForm from "@/components/admin/BuildForm";
 

@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { query } from "@/lib/db";
 import type { Hero } from "@/types";
 import { Plus, Pencil, Eye, EyeOff } from "lucide-react";

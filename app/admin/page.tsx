@@ -1,4 +1,6 @@
 import { query } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import { formatNumber } from "@/lib/utils";
 import Link from "next/link";
 import { Users, Eye, Sword, TrendingUp } from "lucide-react";

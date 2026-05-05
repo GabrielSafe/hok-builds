@@ -1,4 +1,6 @@
 import { query } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
 

@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+
+export const dynamic = "force-dynamic";
 import HeroBanner from "@/components/home/HeroBanner";
 import HeroGrid from "@/components/home/HeroGrid";
 import PopularHeroes from "@/components/home/PopularHeroes";

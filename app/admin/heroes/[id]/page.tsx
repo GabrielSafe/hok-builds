@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { queryOne } from "@/lib/db";
 import type { Hero } from "@/types";
 import HeroForm from "@/components/admin/HeroForm";
