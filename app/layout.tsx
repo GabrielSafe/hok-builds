@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable} ${orbitron.variable}`}>
-      <body className="min-h-screen bg-[#0f0f13] text-gray-100 font-sans antialiased">
+      <body className="min-h-screen text-gray-100 font-sans antialiased" style={{ background: "linear-gradient(160deg,#0B0F17 0%,#0F172A 50%,#0B0F17 100%)", backgroundAttachment: "fixed" }}>
         {children}
       </body>
     </html>

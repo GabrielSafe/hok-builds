@@ -2,28 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base ─────────────────────────────────────────────── */
+/* ─── Base reset ──────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #0f0f13;
-  color: #f4f4f5;
+  background: linear-gradient(160deg, #0B0F17 0%, #0F172A 50%, #0B0F17 100%);
+  background-attachment: fixed;
+  color: #F4F4F5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-/* ─── Scrollbar ─────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #13131a; }
-::-webkit-scrollbar-thumb { background: #2e2e42; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #D4A017; }
+/* ─── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #0B0F17; }
+::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
 
-/* ─── Typography utilities ──────────────────────────────── */
+/* ─── Typography ──────────────────────────────────────── */
 @layer components {
 
-  /* Headings — Montserrat */
   .h1 {
     font-family: var(--font-montserrat), system-ui, sans-serif;
     font-weight: 800;
@@ -37,29 +37,19 @@ body {
     font-family: var(--font-montserrat), system-ui, sans-serif;
     font-weight: 700;
     font-size: clamp(1.25rem, 3vw, 1.75rem);
-    letter-spacing: -0.01em;
     line-height: 1.2;
     color: #ffffff;
   }
 
-  .h3 {
-    font-family: var(--font-montserrat), system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 1.125rem;
-    color: #d4d4d8;
-  }
-
-  /* Section labels */
   .section-label {
     font-family: var(--font-montserrat), system-ui, sans-serif;
     font-weight: 700;
     font-size: 0.6875rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #D4A017;
+    color: #FACC15;
   }
 
-  /* Stats numbers — Orbitron */
   .stat-number {
     font-family: var(--font-orbitron), var(--font-montserrat), sans-serif;
     font-weight: 700;
@@ -67,79 +57,70 @@ body {
     line-height: 1;
   }
 
-  /* Nav links */
   .nav-link {
     font-family: var(--font-montserrat), system-ui, sans-serif;
     font-weight: 600;
     font-size: 0.8125rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     transition: color 0.15s;
   }
 
-  /* Cards */
+  /* ─ Cards ─ */
+  .card {
+    background: linear-gradient(135deg, #1E293B 0%, #1F1F23 100%);
+    border: 1px solid #27272A;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  /* ─ Hero card hover ─ */
   .hero-card {
     @apply relative overflow-hidden rounded-xl cursor-pointer transition-all duration-200;
-    @apply border-2 border-transparent bg-dark-700;
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, #1E293B, #1F1F23);
   }
   .hero-card:hover {
-    @apply border-gold-500;
-    box-shadow: 0 0 18px rgba(212, 160, 23, 0.3);
+    border-color: #FACC15;
+    box-shadow: 0 0 18px rgba(250,204,21,0.3);
+    transform: scale(1.04);
   }
 
-  /* Inputs */
+  /* ─ Input ─ */
   .input {
-    @apply w-full bg-dark-800 border border-dark-500 rounded-lg px-3 py-2.5 text-sm text-white;
-    @apply outline-none focus:border-gold-500 transition-colors;
+    @apply w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-colors;
+    background: #0B0F17;
+    border: 1px solid #27272A;
     font-family: var(--font-inter), system-ui, sans-serif;
   }
+  .input:focus { border-color: #FACC15; }
 
-  /* Role badge */
+  /* ─ Stat card ─ */
+  .stat-card {
+    background: rgba(30,41,59,0.6);
+    border: 1px solid #27272A;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    text-align: center;
+  }
+
+  /* ─ Role badge ─ */
   .role-badge {
     font-family: var(--font-montserrat), system-ui, sans-serif;
     @apply text-xs font-semibold px-2 py-0.5 rounded-full border;
   }
 
-  /* Tier badge */
-  .tier-badge {
-    font-family: var(--font-orbitron), sans-serif;
-    @apply text-sm font-bold px-3 py-1 rounded border-2;
-  }
-
-  /* Item frame — gradiente border */
-  .item-frame {
-    position: relative;
-    border-radius: 50%;
-    padding: 2px;
-    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
-    box-shadow: 0 0 8px rgba(99, 102, 241, 0.4), inset 0 0 6px rgba(0,0,0,0.6);
-    transition: all 0.2s;
-  }
-  .item-frame:hover {
-    background: linear-gradient(135deg, #D4A017 0%, #F0C040 50%, #D4A017 100%);
-    box-shadow: 0 0 14px rgba(212, 160, 23, 0.6);
-    transform: scale(1.08);
-  }
-  .item-frame-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #13131a;
-  }
-
-  /* Phase section box */
+  /* ─ Phase boxes ─ */
   .phase-box {
-    @apply rounded-xl p-3 border border-dark-500;
-    background: rgba(255,255,255,0.03);
+    border-radius: 0.625rem;
+    padding: 0.75rem;
+    border: 1px solid #27272A;
+    background: rgba(255,255,255,0.025);
   }
   .phase-box-highlight {
-    @apply rounded-xl p-3 border border-dark-400;
-    background: rgba(255,255,255,0.05);
-  }
-
-  /* Stat card */
-  .stat-card {
-    @apply bg-dark-600 rounded-lg p-3 border border-dark-500 text-center;
+    border-radius: 0.625rem;
+    padding: 0.75rem;
+    border: 1px solid #3F3F46;
+    background: rgba(255,255,255,0.04);
   }
 }

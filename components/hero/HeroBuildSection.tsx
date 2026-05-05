@@ -27,6 +27,25 @@ interface Props {
   build: Build;
 }
 
+const ITEM_FRAME_STYLE: React.CSSProperties = {
+  padding: "2px",
+  borderRadius: "50%",
+  background: "linear-gradient(135deg, #3B82F6 0%, #6366F1 50%, #8B5CF6 100%)",
+  boxShadow: "0 0 10px rgba(99,102,241,0.45), 0 2px 8px rgba(0,0,0,0.6)",
+  display: "inline-flex",
+  transition: "all 0.2s ease",
+  cursor: "pointer",
+};
+
+const ITEM_FRAME_INNER_STYLE: React.CSSProperties = {
+  borderRadius: "50%",
+  overflow: "hidden",
+  background: "#0B0F17",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
 function ItemFrame({
   name,
   imageUrl,
@@ -37,28 +56,31 @@ function ItemFrame({
   size?: number;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 group">
-      <div className="item-frame" style={{ width: size + 4, height: size + 4 }}>
-        <div className="item-frame-inner">
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      <div
+        style={{ ...ITEM_FRAME_STYLE, width: size + 4, height: size + 4 }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "linear-gradient(135deg, #FACC15 0%, #F0C040 50%, #D4AF37 100%)";
+          el.style.boxShadow = "0 0 16px rgba(250,204,21,0.6)";
+          el.style.transform = "scale(1.1)";
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "linear-gradient(135deg, #3B82F6 0%, #6366F1 50%, #8B5CF6 100%)";
+          el.style.boxShadow = "0 0 10px rgba(99,102,241,0.45), 0 2px 8px rgba(0,0,0,0.6)";
+          el.style.transform = "scale(1)";
+        }}
+      >
+        <div style={{ ...ITEM_FRAME_INNER_STYLE, width: size, height: size }}>
           {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={name}
-              width={size}
-              height={size}
-              className="w-full h-full object-cover"
-            />
+            <Image src={imageUrl} alt={name} width={size} height={size} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <div
-              className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500 font-heading"
-              style={{ width: size, height: size }}
-            >
-              {name[0]}
-            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#71717A" }}>{name[0]}</span>
           )}
         </div>
       </div>
-      <span className="text-[10px] text-gray-400 text-center font-sans leading-tight max-w-[64px]">
+      <span style={{ fontSize: 10, color: "#A1A1AA", textAlign: "center", maxWidth: 64, lineHeight: 1.3, fontFamily: "var(--font-inter)" }}>
         {name}
       </span>
     </div>
@@ -196,22 +218,24 @@ export default function HeroBuildSection({ build }: Props) {
               <div className="flex flex-wrap gap-4 items-end">
                 {arcana.map((a, i) => (
                   <div key={i} className="flex flex-col items-center gap-1">
-                    {/* Arcana frame — dourado */}
                     <div
                       style={{
                         padding: 2,
                         borderRadius: "50%",
-                        background: "linear-gradient(135deg, #D4A017, #F0C040, #B8860B)",
-                        boxShadow: "0 0 10px rgba(212,160,23,0.35)",
+                        background: "linear-gradient(135deg, #FACC15, #F0C040, #D4AF37)",
+                        boxShadow: "0 0 12px rgba(250,204,21,0.4)",
+                        display: "inline-flex",
                         transition: "all 0.2s",
+                        cursor: "pointer",
                       }}
-                      className="hover:scale-110"
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.1)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                     >
-                      <div className="rounded-full overflow-hidden bg-dark-900" style={{ width: 44, height: 44 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "#0B0F17" }}>
                         {a.arcana_image_url ? (
-                          <Image src={a.arcana_image_url} alt={a.arcana_name} width={44} height={44} className="object-cover w-full h-full" />
+                          <Image src={a.arcana_image_url} alt={a.arcana_name} width={44} height={44} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gold-400">{a.arcana_name[0]}</div>
+                          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#FACC15" }}>{a.arcana_name[0]}</div>
                         )}
                       </div>
                     </div>
@@ -247,12 +271,16 @@ export default function HeroBuildSection({ build }: Props) {
                     style={{
                       padding: 2,
                       borderRadius: 10,
-                      background: "linear-gradient(135deg, #3b82f6, #6366f1)",
-                      boxShadow: "0 0 8px rgba(99,102,241,0.4)",
+                      background: "linear-gradient(135deg, #3B82F6, #6366F1)",
+                      boxShadow: "0 0 10px rgba(99,102,241,0.4)",
+                      display: "inline-flex",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
                     }}
-                    className="hover:scale-110 transition-transform"
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.1)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                   >
-                    <div className="rounded-lg overflow-hidden bg-dark-900" style={{ width: 40, height: 40 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 8, overflow: "hidden", background: "#0B0F17" }}>
                       {s.skill_image_url ? (
                         <Image src={s.skill_image_url} alt={s.skill_name} width={40} height={40} className="object-cover w-full h-full" />
                       ) : (

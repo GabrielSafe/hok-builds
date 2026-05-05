@@ -39,7 +39,7 @@ export default function Header() {
   }, [query]);
 
   return (
-    <header className="sticky top-0 z-50 bg-dark-800/95 backdrop-blur-md border-b border-dark-600">
+    <header className="sticky top-0 z-50 backdrop-blur-md border-b border-dark-500" style={{ background: "rgba(11,15,23,0.96)" }}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-8">
 
         {/* Logo */}
@@ -62,7 +62,7 @@ export default function Header() {
 
         {/* Search */}
         <div ref={searchRef} className="relative flex-1 max-w-xs ml-auto">
-          <div className="flex items-center bg-dark-700 border border-dark-500 rounded-lg px-3 py-2 gap-2 focus-within:border-gold-500 transition-colors">
+          <div className="flex items-center rounded-lg px-3 py-2 gap-2 transition-colors focus-within:border-gold-400" style={{ background: "#1E293B", border: "1px solid #27272A" }}>
             <Search size={15} className="text-gray-500 shrink-0" />
             <input
               type="text"
