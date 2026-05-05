@@ -8,26 +8,32 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        heading: ["var(--font-montserrat)", "system-ui", "sans-serif"],
+        display: ["var(--font-orbitron)", "var(--font-montserrat)", "sans-serif"],
+      },
       colors: {
         gold: {
+          300: "#FAD87A",
           400: "#F0C040",
           500: "#D4A017",
           600: "#B8860B",
         },
         dark: {
-          900: "#0A0A0F",
-          800: "#0F0F1A",
-          700: "#141420",
-          600: "#1A1A2E",
-          500: "#1E1E35",
-          400: "#252540",
+          900: "#0f0f13",
+          800: "#13131a",
+          700: "#18181f",
+          600: "#1e1e28",
+          500: "#252535",
+          400: "#2e2e42",
         },
       },
-      fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      letterSpacing: {
+        widest: "0.2em",
       },
     },
   },

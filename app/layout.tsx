@@ -1,5 +1,24 @@
 import type { Metadata } from "next";
+import { Inter, Montserrat, Orbitron } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  variable: "--font-orbitron",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -15,14 +34,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen bg-dark-900 text-gray-100">
+    <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable} ${orbitron.variable}`}>
+      <body className="min-h-screen bg-[#0f0f13] text-gray-100 font-sans antialiased">
         {children}
       </body>
     </html>

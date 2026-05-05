@@ -119,9 +119,9 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           )}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-2xl font-black text-white">{hero.name}</h1>
+              <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">{hero.name}</h1>
               {stats?.tier && (
-                <span className={`text-xs font-black px-2 py-0.5 rounded ${TIER_COLORS[stats.tier] ?? "bg-gray-600 text-white"}`}>
+                <span className={`font-display text-xs font-bold px-2 py-0.5 rounded ${TIER_COLORS[stats.tier] ?? "bg-gray-600 text-white"}`}>
                   TIER {stats.tier}
                 </span>
               )}
@@ -153,8 +153,8 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
                 { label: "Ban Rate", value: formatPercent(stats.banrate), color: "text-red-400" },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <p className={`text-lg font-black ${s.color}`}>{s.value}</p>
-                  <p className="text-xs text-gray-500">{s.label}</p>
+                  <p className={`stat-number text-lg ${s.color}`}>{s.value}</p>
+                  <p className="text-xs text-gray-500 font-sans">{s.label}</p>
                 </div>
               ))}
             </div>

@@ -38,19 +38,17 @@ export default async function HeroBanner() {
 
       {/* Content */}
       <div className="relative z-10 px-8 py-10 max-w-xl">
-        <p className="text-gold-400 text-xs font-bold uppercase tracking-widest mb-2">
-          Guias & Builds
-        </p>
-        <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3">
+        <p className="section-label mb-3">Guias & Builds</p>
+        <h1 className="font-heading font-extrabold text-3xl md:text-4xl text-white leading-tight mb-3 tracking-tight">
           Guias e builds para todos os heróis de{" "}
           <span className="text-gold-400">Honor of Kings</span>
         </h1>
-        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+        <p className="text-gray-400 text-sm mb-6 leading-relaxed font-sans">
           As melhores builds, arcana, feitiços e dicas para você dominar o campo de batalha!
         </p>
         <Link
           href="/heroes"
-          className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-dark-900 font-bold text-sm px-6 py-2.5 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-dark-900 font-heading font-bold text-sm px-6 py-2.5 rounded-lg transition-colors tracking-wide"
         >
           Ver Todos os Heróis
         </Link>

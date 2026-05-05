@@ -55,8 +55,8 @@ export default function HeroGrid({ onHeroHover }: Props) {
   return (
     <section className="py-8">
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-1 h-5 bg-gold-500 rounded-full" />
-        <h2 className="text-base font-bold text-white uppercase tracking-wider">Todos os Heróis</h2>
+        <div className="w-1 h-5 bg-gold-500 rounded-sm" />
+        <h2 className="font-heading font-bold text-sm text-white uppercase tracking-widest">Todos os Heróis</h2>
       </div>
 
       {/* Filters row */}
@@ -66,7 +66,7 @@ export default function HeroGrid({ onHeroHover }: Props) {
             <button
               key={r.value}
               onClick={() => setRole(r.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-semibold tracking-wide transition-all ${
                 role === r.value
                   ? "bg-gold-500 text-dark-900"
                   : "bg-dark-700 text-gray-400 hover:text-white border border-dark-600 hover:border-dark-400"

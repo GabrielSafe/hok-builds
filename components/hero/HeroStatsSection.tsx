@@ -22,34 +22,34 @@ export default function HeroStatsSection({ stats, totalViews }: Props) {
       <p className="section-title">Estatísticas</p>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="stat-card text-center">
-          <p className="text-xs text-gray-500 mb-1">Taxa de Vitória</p>
-          <p className="text-xl font-black text-green-400">{formatPercent(stats.winrate)}</p>
+        <div className="stat-card">
+          <p className="text-2xs text-gray-500 mb-1 font-heading uppercase tracking-wider">Taxa de Vitória</p>
+          <p className="stat-number text-xl text-green-400">{formatPercent(stats.winrate)}</p>
         </div>
-        <div className="stat-card text-center">
-          <p className="text-xs text-gray-500 mb-1">Taxa de Escolha</p>
-          <p className="text-xl font-black text-blue-400">{formatPercent(stats.pickrate)}</p>
+        <div className="stat-card">
+          <p className="text-2xs text-gray-500 mb-1 font-heading uppercase tracking-wider">Taxa de Escolha</p>
+          <p className="stat-number text-xl text-blue-400">{formatPercent(stats.pickrate)}</p>
         </div>
-        <div className="stat-card text-center">
-          <p className="text-xs text-gray-500 mb-1">Taxa de Banimento</p>
-          <p className="text-xl font-black text-red-400">{formatPercent(stats.banrate)}</p>
+        <div className="stat-card">
+          <p className="text-2xs text-gray-500 mb-1 font-heading uppercase tracking-wider">Taxa de Ban</p>
+          <p className="stat-number text-xl text-red-400">{formatPercent(stats.banrate)}</p>
         </div>
-        <div className="stat-card text-center">
-          <p className="text-xs text-gray-500 mb-1">Partidas</p>
-          <p className="text-xl font-black text-white">{formatNumber(stats.games_played)}</p>
+        <div className="stat-card">
+          <p className="text-2xs text-gray-500 mb-1 font-heading uppercase tracking-wider">Partidas</p>
+          <p className="stat-number text-xl text-white">{formatNumber(stats.games_played)}</p>
         </div>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-dark-500">
         <div>
-          <p className="text-xs text-gray-500">Tier Atual</p>
-          <div className={`text-2xl font-black border-2 w-10 h-10 rounded flex items-center justify-center mt-1 ${tierColor}`}>
+          <p className="text-2xs text-gray-500 font-heading uppercase tracking-wider">Tier Atual</p>
+          <div className={`font-display text-2xl font-bold border-2 w-10 h-10 rounded flex items-center justify-center mt-1 ${tierColor}`}>
             {stats.tier}
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500">Visualizações</p>
-          <p className="text-lg font-bold text-gold-400 mt-1">{formatNumber(totalViews)}</p>
+          <p className="text-2xs text-gray-500 font-heading uppercase tracking-wider">Visualizações</p>
+          <p className="stat-number text-lg text-gold-400 mt-1">{formatNumber(totalViews)}</p>
         </div>
       </div>
     </div>

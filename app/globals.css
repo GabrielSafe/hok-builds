@@ -2,73 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ─── Base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-:root {
-  --gold: #D4A017;
-  --gold-light: #F0C040;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: #0A0A0F;
-  color: #E5E7EB;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #0f0f13;
+  color: #f4f4f5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0F0F1A;
-}
-::-webkit-scrollbar-thumb {
-  background: #2a2a4a;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #D4A017;
-}
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #13131a; }
+::-webkit-scrollbar-thumb { background: #2e2e42; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #D4A017; }
 
+/* ─── Typography utilities ──────────────────────────────── */
 @layer components {
+
+  /* Headings — Montserrat */
+  .h1 {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: #ffffff;
+  }
+
+  .h2 {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: #ffffff;
+  }
+
+  .h3 {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #d4d4d8;
+  }
+
+  /* Section labels */
+  .section-label {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #D4A017;
+  }
+
+  /* Stats numbers — Orbitron */
+  .stat-number {
+    font-family: var(--font-orbitron), var(--font-montserrat), sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  /* Nav links */
+  .nav-link {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+
+  /* Cards */
   .hero-card {
-    @apply relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300;
-    @apply border border-transparent bg-dark-700;
+    @apply relative overflow-hidden rounded-xl cursor-pointer transition-all duration-200;
+    @apply border-2 border-transparent bg-dark-700;
   }
   .hero-card:hover {
-    @apply border-gold-500 scale-105 shadow-lg;
-    box-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+    @apply border-gold-500;
+    box-shadow: 0 0 18px rgba(212, 160, 23, 0.3);
   }
 
-  .role-badge {
-    @apply text-xs font-semibold px-2 py-0.5 rounded-full;
-  }
-
-  .tier-badge {
-    @apply text-sm font-bold px-3 py-1 rounded;
-  }
-
-  .stat-card {
-    @apply bg-dark-600 rounded-lg p-4 border border-dark-500;
-  }
-
-  .gold-text {
-    color: var(--gold-light);
-  }
-
-  .section-title {
-    @apply text-xs font-bold uppercase tracking-widest text-gold-400 mb-3;
-  }
-
+  /* Inputs */
   .input {
-    @apply w-full bg-dark-800 border border-dark-500 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-500 transition-colors;
+    @apply w-full bg-dark-800 border border-dark-500 rounded-lg px-3 py-2.5 text-sm text-white;
+    @apply outline-none focus:border-gold-500 transition-colors;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Role badge */
+  .role-badge {
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    @apply text-xs font-semibold px-2 py-0.5 rounded-full border;
+  }
+
+  /* Tier badge */
+  .tier-badge {
+    font-family: var(--font-orbitron), sans-serif;
+    @apply text-sm font-bold px-3 py-1 rounded border-2;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-dark-600 rounded-lg p-3 border border-dark-500 text-center;
   }
 }
