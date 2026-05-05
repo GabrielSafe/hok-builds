@@ -21,7 +21,7 @@ export default function BuildEditor({ buildId, availableItems, availableArcana, 
   const [spells, setSpells] = useState<BuildRow[]>([]);
   const [skillOrder, setSkillOrder] = useState<BuildRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState<"core" | "start">("core");
+  const [phase, setPhase] = useState<"start" | "core" | "boots" | "final">("core");
 
   async function load() {
     setLoading(true);
@@ -63,36 +63,56 @@ export default function BuildEditor({ buildId, availableItems, availableArcana, 
 
       {/* ITEMS */}
       <Section title="Itens da Build">
-        <div className="flex gap-2 mb-4">
-          {(["core", "start"] as const).map((p) => (
-            <button key={p} onClick={() => setPhase(p)}
-              className={`px-3 py-1 rounded text-xs font-bold transition-colors ${phase === p ? "bg-gold-500 text-dark-900" : "bg-dark-600 text-gray-400 hover:text-white"}`}>
-              {p === "core" ? "Core" : "Item Inicial"}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {([
+            { value: "start", label: "Item Inicial" },
+            { value: "core", label: "Core" },
+            { value: "boots", label: "Botas" },
+            { value: "final", label: "Build Final" },
+          ] as const).map((p) => (
+            <button key={p.value} onClick={() => setPhase(p.value)}
+              className={`px-3 py-1 rounded text-xs font-bold transition-colors ${phase === p.value ? "bg-gold-500 text-dark-900" : "bg-dark-600 text-gray-400 hover:text-white border border-dark-500"}`}>
+              {p.label}
             </button>
           ))}
         </div>
 
-        {/* Current items */}
-        <div className="flex flex-wrap gap-2 mb-4 min-h-[56px] p-3 bg-dark-600 rounded-lg border border-dark-500">
-          {items.length === 0
-            ? <p className="text-xs text-gray-600 self-center">Nenhum item adicionado ainda</p>
-            : items.map((item) => (
-              <div key={item.id} className="relative group">
-                <div className="w-12 h-12 rounded-lg border border-dark-500 overflow-hidden bg-dark-700">
-                  {item.image_url
-                    ? <Image src={item.image_url} alt={item.name} width={48} height={48} className="object-cover w-full h-full" />
-                    : <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">{item.name[0]}</div>
+        {/* Preview por fase */}
+        <div className="grid grid-cols-4 gap-2 mb-4 text-[10px]">
+          {([
+            { value: "start", label: "Item Inicial" },
+            { value: "core", label: "Core" },
+            { value: "boots", label: "Botas" },
+            { value: "final", label: "Build Final" },
+          ] as const).map((p) => {
+            const phaseItems = items.filter((i) => i.phase === p.value);
+            return (
+              <div key={p.value} className={`rounded-lg p-2 border ${phase === p.value ? "border-gold-500/50 bg-gold-500/5" : "border-dark-500 bg-dark-600/50"}`}>
+                <p className="text-gray-500 uppercase tracking-wider mb-1.5">{p.label}</p>
+                <div className="flex flex-wrap gap-1">
+                  {phaseItems.length === 0
+                    ? <span className="text-gray-700 italic">vazio</span>
+                    : phaseItems.map((item, i) => (
+                      <div key={i} className="relative group">
+                        <div className="w-7 h-7 rounded border border-dark-500 overflow-hidden bg-dark-700">
+                          {item.image_url
+                            ? <Image src={item.image_url} alt={item.name} width={28} height={28} className="object-cover w-full h-full" />
+                            : <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-600">{item.name[0]}</div>
+                          }
+                        </div>
+                        <button onClick={() => remove("item", item.id)}
+                          className="absolute -top-1 -right-1 bg-red-600 rounded-full w-3 h-3 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <X size={8} className="text-white" />
+                        </button>
+                      </div>
+                    ))
                   }
                 </div>
-                <button onClick={() => remove("item", item.id)}
-                  className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X size={10} className="text-white" />
-                </button>
-                <p className="text-[9px] text-gray-500 text-center mt-0.5 w-12 truncate">{item.name}</p>
               </div>
-            ))
-          }
+            );
+          })}
         </div>
+
 
         {/* Available items */}
         <p className="text-xs text-gray-500 mb-2">Clique para adicionar como <strong className="text-gold-400">{phase === "core" ? "Core" : "Item Inicial"}</strong>:</p>
