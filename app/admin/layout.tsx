@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { LayoutDashboard, Users, Sword, BarChart2, LogOut } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session) redirect("/admin/login");
+
+  // Login page — no sidebar, middleware handles the redirect
+  if (!session) {
+    return <div className="min-h-screen bg-dark-900">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-dark-900 flex">
