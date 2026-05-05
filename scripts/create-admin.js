@@ -4,7 +4,6 @@
  */
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
-require("dotenv").config({ path: ".env.local" });
 
 const [, , email, password, name] = process.argv;
 
