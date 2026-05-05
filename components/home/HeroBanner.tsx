@@ -5,6 +5,10 @@ import type { Hero } from "@/types";
 
 async function getFeaturedHero(): Promise<Hero | null> {
   return queryOne<Hero>(
+    `SELECT * FROM heroes
+     WHERE is_published = true AND is_featured = true
+     LIMIT 1`
+  ) ?? queryOne<Hero>(
     `SELECT h.* FROM heroes h
      WHERE h.is_published = true
      ORDER BY (SELECT COUNT(*) FROM hero_views WHERE hero_id = h.id) DESC

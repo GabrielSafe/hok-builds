@@ -11,6 +11,7 @@ export interface Hero {
   icon_url: string | null;
   splash_url: string | null;
   is_published: boolean;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
   total_views?: number;

@@ -15,13 +15,17 @@ export async function PUT(
     await requireAuth();
     const { id } = await params;
     const body = await request.json();
-    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published } = body;
+    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured } = body;
+
+    if (is_featured) {
+      await query("UPDATE heroes SET is_featured = false WHERE is_featured = true AND id != $1", [id]);
+    }
 
     const hero = await queryOne(
       `UPDATE heroes SET name=$1, role=$2, difficulty=$3, description=$4, lore=$5,
-       icon_url=$6, splash_url=$7, is_published=$8, updated_at=NOW()
-       WHERE id=$9 RETURNING *`,
-      [name, role, difficulty, description, lore, icon_url, splash_url, is_published, id]
+       icon_url=$6, splash_url=$7, is_published=$8, is_featured=$9, updated_at=NOW()
+       WHERE id=$10 RETURNING *`,
+      [name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured ?? false, id]
     );
 
     if (!hero) return NextResponse.json({ error: "Not found" }, { status: 404 });

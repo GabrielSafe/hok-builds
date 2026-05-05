@@ -27,6 +27,7 @@ export default function HeroForm({ hero }: Props) {
     description: hero?.description ?? "",
     lore: hero?.lore ?? "",
     is_published: hero?.is_published ?? false,
+    is_featured: hero?.is_featured ?? false,
     icon_url: hero?.icon_url ?? "",
     splash_url: hero?.splash_url ?? "",
   });
@@ -161,15 +162,30 @@ export default function HeroForm({ hero }: Props) {
         />
       </div>
 
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          id="published"
-          checked={form.is_published}
-          onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-          className="w-4 h-4 accent-gold-500"
-        />
-        <label htmlFor="published" className="text-sm text-gray-300">Publicar herói</label>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="published"
+            checked={form.is_published}
+            onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
+            className="w-4 h-4 accent-gold-500"
+          />
+          <label htmlFor="published" className="text-sm text-gray-300">Publicar herói</label>
+        </div>
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="featured"
+            checked={form.is_featured}
+            onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+            className="w-4 h-4 accent-gold-500"
+          />
+          <label htmlFor="featured" className="text-sm text-gray-300">
+            Destaque no banner da home
+            <span className="ml-2 text-xs text-gray-500">(substitui o banner principal)</span>
+          </label>
+        </div>
       </div>
 
       <div className="flex gap-3 pt-2">

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS heroes (
   icon_url    TEXT,
   splash_url  TEXT,
   is_published BOOLEAN NOT NULL DEFAULT false,
+  is_featured  BOOLEAN NOT NULL DEFAULT false,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     await requireAuth();
     const body = await request.json();
-    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published } = body;
+    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured } = body;
 
     if (!name || !role) {
       return NextResponse.json({ error: "name e role obrigatórios" }, { status: 400 });
@@ -32,11 +32,15 @@ export async function POST(request: NextRequest) {
 
     const slug = slugify(name);
 
+    if (is_featured) {
+      await queryOne("UPDATE heroes SET is_featured = false WHERE is_featured = true", []);
+    }
+
     const hero = await queryOne(
-      `INSERT INTO heroes (name, slug, role, difficulty, description, lore, icon_url, splash_url, is_published)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO heroes (name, slug, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
-      [name, slug, role, difficulty ?? 1, description, lore, icon_url, splash_url, is_published ?? false]
+      [name, slug, role, difficulty ?? 1, description, lore, icon_url, splash_url, is_published ?? false, is_featured ?? false]
     );
 
     await query(
