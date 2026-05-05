@@ -48,8 +48,8 @@ export default function HeroForm({ hero }: Props) {
     fd.append("file", file);
     fd.append("path", path);
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    if (!res.ok) throw new Error("Upload falhou");
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Upload falhou");
     return data.url;
   }
 

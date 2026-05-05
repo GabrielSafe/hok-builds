@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "file e path obrigatórios" }, { status: 400 });
   }
 
-  const allowedTypes = ["image/webp", "image/png", "image/jpeg", "image/jpg"];
-  if (!allowedTypes.includes(file.type)) {
-    return NextResponse.json({ error: "Tipo de arquivo inválido" }, { status: 400 });
+  const allowedTypes = ["image/webp", "image/png", "image/jpeg", "image/jpg", "image/gif", "image/avif"];
+  if (file.type && !allowedTypes.includes(file.type)) {
+    return NextResponse.json({ error: `Tipo inválido: ${file.type}` }, { status: 400 });
   }
 
   if (file.size > 5 * 1024 * 1024) {
