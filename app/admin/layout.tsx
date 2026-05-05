@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getSession } from "@/lib/auth";
-import { LayoutDashboard, Users, Sword, BarChart2, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Sword, BarChart2, LogOut, Package, Sparkles, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +24,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <NavItem href="/admin" icon={<LayoutDashboard size={16} />} label="Dashboard" />
+          <div className="pt-2 pb-1">
+            <p className="text-[10px] text-gray-600 uppercase tracking-wider px-3">Conteúdo</p>
+          </div>
           <NavItem href="/admin/heroes" icon={<Users size={16} />} label="Heróis" />
           <NavItem href="/admin/builds" icon={<Sword size={16} />} label="Builds" />
           <NavItem href="/admin/stats" icon={<BarChart2 size={16} />} label="Estatísticas" />
+          <div className="pt-2 pb-1">
+            <p className="text-[10px] text-gray-600 uppercase tracking-wider px-3">Cadastros</p>
+          </div>
+          <NavItem href="/admin/items" icon={<Package size={16} />} label="Itens" />
+          <NavItem href="/admin/arcana" icon={<Sparkles size={16} />} label="Arcana" />
+          <NavItem href="/admin/spells" icon={<Zap size={16} />} label="Feitiços" />
         </nav>
 
         <div className="p-3 border-t border-dark-600">

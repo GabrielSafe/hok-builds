@@ -2,7 +2,7 @@ import { query } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 import Link from "next/link";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Settings } from "lucide-react";
 
 interface BuildRow {
   id: number;
@@ -63,13 +63,12 @@ export default async function AdminBuildsPage() {
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/builds/${b.id}`}
-                    className="flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300"
-                  >
-                    <Pencil size={12} />
-                    Editar
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <Link href={`/admin/builds/${b.id}`} className="flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300">
+                      <Settings size={12} />
+                      Editor
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}
