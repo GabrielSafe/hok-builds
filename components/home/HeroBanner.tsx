@@ -30,9 +30,9 @@ export default async function HeroBanner() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-top opacity-30"
+            className="object-cover object-top opacity-50"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-900/90 via-dark-900/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-900/95 via-dark-900/70 to-dark-900/30" />
         </div>
       )}
 
@@ -56,19 +56,6 @@ export default async function HeroBanner() {
         </Link>
       </div>
 
-      {/* Hero image floating */}
-      {hero?.splash_url && (
-        <div className="hidden md:block absolute right-0 bottom-0 w-72 h-72 opacity-60">
-          <Image
-            src={hero.splash_url}
-            alt={hero.name}
-            fill
-            sizes="300px"
-            className="object-cover object-top"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent to-dark-900/60" />
-        </div>
-      )}
     </section>
   );
 }
