@@ -23,10 +23,10 @@ function ItemIcon({ name, imageUrl, slug }: { name: string; imageUrl: string | n
 }
 
 export default function HeroBuildSection({ build }: Props) {
-  const items = (build.items ?? []) as Array<{ item_name: string; item_image_url: string; item_slug: string }>;
-  const arcana = (build.arcana ?? []) as Array<{ arcana_name: string; arcana_image_url: string; arcana_slug: string; arcana_tier: number; quantity: number }>;
-  const spells = (build.spells ?? []) as Array<{ spell_name: string; spell_image_url: string; spell_slug: string }>;
-  const skillOrder = (build.skill_order ?? []) as Array<{ skill_name: string; skill_key: string; skill_image_url: string | null; sort_order: number }>;
+  const items = (build.items ?? []) as unknown as Array<{ item_name: string; item_image_url: string; item_slug: string }>;
+  const arcana = (build.arcana ?? []) as unknown as Array<{ arcana_name: string; arcana_image_url: string; arcana_slug: string; arcana_tier: number; quantity: number }>;
+  const spells = (build.spells ?? []) as unknown as Array<{ spell_name: string; spell_image_url: string; spell_slug: string }>;
+  const skillOrder = (build.skill_order ?? []) as unknown as Array<{ skill_name: string; skill_key: string; skill_image_url: string | null; sort_order: number }>;
 
   return (
     <div className="space-y-6">
