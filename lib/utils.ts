@@ -14,13 +14,17 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function formatNumber(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return n.toString();
+export function formatNumber(n: number | string): string {
+  const num = typeof n === "string" ? parseFloat(n) : n;
+  if (isNaN(num)) return "0";
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
 }
 
-export function formatPercent(n: number): string {
-  return `${n.toFixed(1)}%`;
+export function formatPercent(n: number | string): string {
+  const num = typeof n === "string" ? parseFloat(n) : n;
+  if (isNaN(num)) return "0%";
+  return `${num.toFixed(1)}%`;
 }
 
 export function hashIp(ip: string): string {
