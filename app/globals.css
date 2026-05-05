@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --gold: #D4A017;
+  --gold-light: #F0C040;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0A0A0F;
+  color: #E5E7EB;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0F0F1A;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a4a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4A017;
+}
+
+@layer components {
+  .hero-card {
+    @apply relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300;
+    @apply border border-transparent bg-dark-700;
+  }
+  .hero-card:hover {
+    @apply border-gold-500 scale-105 shadow-lg;
+    box-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+  }
+
+  .role-badge {
+    @apply text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+
+  .tier-badge {
+    @apply text-sm font-bold px-3 py-1 rounded;
+  }
+
+  .stat-card {
+    @apply bg-dark-600 rounded-lg p-4 border border-dark-500;
+  }
+
+  .gold-text {
+    color: var(--gold-light);
+  }
+
+  .section-title {
+    @apply text-xs font-bold uppercase tracking-widest text-gold-400 mb-3;
+  }
+
+  .input {
+    @apply w-full bg-dark-800 border border-dark-500 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-500 transition-colors;
+  }
+}
