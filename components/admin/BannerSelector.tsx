@@ -20,10 +20,10 @@ export default function BannerSelector({ heroes, featuredIds: initial }: Props) 
     setSaving(hero.id);
     setSuccess(false);
 
-    await fetch(`/api/admin/heroes/${hero.id}`, {
+    await fetch(`/api/admin/heroes/${hero.id}/featured`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...hero, is_featured: !isCurrently }),
+      body: JSON.stringify({ is_featured: !isCurrently }),
     });
 
     setFeaturedIds((prev) => {
