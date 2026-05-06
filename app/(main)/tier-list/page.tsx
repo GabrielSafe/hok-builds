@@ -17,7 +17,6 @@ interface TierHero {
   role: string;
   icon_url: string | null;
   tier: string;
-  winrate: number;
 }
 
 const TIER_ORDER = ["S", "A", "B", "C", "D"];
@@ -39,14 +38,13 @@ const TIER_COLORS: Record<string, string> = {
 async function getTierList(): Promise<TierHero[]> {
   return query<TierHero>(
     `SELECT h.id, h.name, h.slug, h.role, h.icon_url,
-            COALESCE(s.tier, 'B') AS tier,
-            COALESCE(s.winrate, 0) AS winrate
+            COALESCE(s.tier, 'B') AS tier
      FROM heroes h
      LEFT JOIN hero_stats s ON s.hero_id = h.id
      WHERE h.is_published = true
      ORDER BY
        CASE COALESCE(s.tier, 'B') WHEN 'S' THEN 1 WHEN 'A' THEN 2 WHEN 'B' THEN 3 WHEN 'C' THEN 4 ELSE 5 END,
-       s.winrate DESC NULLS LAST`
+       h.name ASC`
   );
 }
 
@@ -61,7 +59,7 @@ export default async function TierListPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-black text-white mb-2">Tier List</h1>
-      <p className="text-gray-500 text-sm mb-8">Ranking dos heróis baseado em winrate e performance.</p>
+      <p className="text-gray-500 text-sm mb-8">Ranking dos heróis por tier.</p>
 
       <div className="space-y-4">
         {TIER_ORDER.map((tier) => {

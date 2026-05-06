@@ -9,7 +9,7 @@ import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
 import RoleBadge from "@/components/ui/RoleBadge";
 import DifficultyStars from "@/components/ui/DifficultyStars";
 import { query, queryOne } from "@/lib/db";
-import { formatNumber, formatPercent } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import type { Hero, HeroStats, Skill, Build } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -150,21 +150,6 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
-          {/* Stats */}
-          {stats && (
-            <div className="flex gap-6 shrink-0">
-              {[
-                { label: "Win Rate",  value: formatPercent(stats.winrate),  color: "#22C55E" },
-                { label: "Pick Rate", value: formatPercent(stats.pickrate), color: "#3B82F6" },
-                { label: "Ban Rate",  value: formatPercent(stats.banrate),  color: "#EF4444" },
-              ].map(s => (
-                <div key={s.label} className="text-center">
-                  <p className="stat-number text-xl" style={{ color: s.color }}>{s.value}</p>
-                  <p className="text-xs text-gray-500 font-sans mt-0.5">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* ── Main grid ── */}
@@ -187,26 +172,6 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           <div className="space-y-4">
             {skills.length > 0 && <HeroSkillsSection skills={skills} />}
 
-            {stats && (
-              <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)", border: "1px solid #27272A" }}>
-                <div className="px-5 py-3 border-b" style={{ borderColor: "#27272A" }}>
-                  <p className="section-label">Estatísticas</p>
-                </div>
-                <div className="p-5 grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Win Rate",  value: formatPercent(stats.winrate),   color: "#22C55E" },
-                    { label: "Pick Rate", value: formatPercent(stats.pickrate),  color: "#3B82F6" },
-                    { label: "Ban Rate",  value: formatPercent(stats.banrate),   color: "#EF4444" },
-                    { label: "Partidas",  value: formatNumber(stats.games_played), color: "#F4F4F5" },
-                  ].map(s => (
-                    <div key={s.label} className="stat-card">
-                      <p className="stat-number text-xl" style={{ color: s.color }}>{s.value}</p>
-                      <p className="text-2xs text-gray-500 font-heading uppercase tracking-wider mt-1">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

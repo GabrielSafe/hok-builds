@@ -21,7 +21,7 @@ export async function GET(
   const h = hero as { id: number };
 
   const [stats, build] = await Promise.all([
-    queryOne(`SELECT winrate, pickrate, games_played, tier FROM hero_stats WHERE hero_id = $1`, [h.id]),
+    queryOne(`SELECT tier FROM hero_stats WHERE hero_id = $1`, [h.id]),
     queryOne(`SELECT id FROM builds WHERE hero_id = $1 AND is_recommended = true LIMIT 1`, [h.id]),
   ]);
 

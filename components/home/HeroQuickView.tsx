@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, ChevronRight } from "lucide-react";
-import { formatNumber, formatPercent } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 import type { HeroRole } from "@/types";
 
 interface QuickHero {
@@ -18,9 +18,6 @@ interface QuickHero {
   splash_url: string | null;
   total_views?: number;
   stats?: {
-    winrate: number | string;
-    pickrate: number | string;
-    games_played: number;
     tier: string;
   } | null;
   build?: {
@@ -201,27 +198,12 @@ export default function HeroQuickView({ heroId }: Props) {
             </div>
           )}
 
-          {/* Stats */}
+          {/* Tier */}
           {hero.stats && (
             <div>
-              <p className="text-[10px] font-bold text-gold-400 uppercase tracking-wider mb-2">Estatísticas</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-dark-700 rounded-lg p-2 text-center">
-                  <p className={`text-lg font-black ${tierColor}`}>{hero.stats.tier}</p>
-                  <p className="text-[9px] text-gray-500 uppercase">Tier</p>
-                </div>
-                <div className="bg-dark-700 rounded-lg p-2 text-center">
-                  <p className="text-sm font-black text-green-400">{formatPercent(hero.stats.winrate)}</p>
-                  <p className="text-[9px] text-gray-500 uppercase">Win Rate</p>
-                </div>
-                <div className="bg-dark-700 rounded-lg p-2 text-center">
-                  <p className="text-sm font-black text-blue-400">{formatPercent(hero.stats.pickrate)}</p>
-                  <p className="text-[9px] text-gray-500 uppercase">Pick Rate</p>
-                </div>
-                <div className="bg-dark-700 rounded-lg p-2 text-center">
-                  <p className="text-sm font-black text-white">{formatNumber(hero.stats.games_played)}</p>
-                  <p className="text-[9px] text-gray-500 uppercase">Partidas</p>
-                </div>
+              <p className="text-[10px] font-bold text-gold-400 uppercase tracking-wider mb-2">Tier</p>
+              <div className="bg-dark-700 rounded-lg p-3 text-center w-16">
+                <p className={`text-2xl font-black ${tierColor}`}>{hero.stats.tier}</p>
               </div>
             </div>
           )}

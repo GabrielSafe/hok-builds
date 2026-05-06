@@ -20,10 +20,6 @@ export interface Hero {
 export interface HeroStats {
   id: number;
   hero_id: number;
-  winrate: number;
-  pickrate: number;
-  banrate: number;
-  games_played: number;
   tier: string;
   updated_at: string;
 }
