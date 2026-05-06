@@ -24,6 +24,19 @@ function parseBrowser(ua: string): string {
 }
 
 const SKIP = /^\/_next\/|^\/favicon|\.ico$|\.png$|\.jpg$|\.svg$|\.webp$|\.woff/;
+const PRIVATE_IP = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1)/;
+
+async function getLocation(ip: string): Promise<string> {
+  if (PRIVATE_IP.test(ip) || ip === "unknown") return "Rede Local";
+  try {
+    const res = await fetch(`http://ip-api.com/json/${ip}?fields=country,city,regionName`, {
+      signal: AbortSignal.timeout(1500),
+    });
+    const data = await res.json() as { country?: string; city?: string; regionName?: string };
+    if (data.country) return `${data.city ?? ""}, ${data.country}`.replace(/^, /, "");
+  } catch {}
+  return "—";
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -48,13 +61,15 @@ export async function middleware(request: NextRequest) {
     const browser = parseBrowser(ua);
     const method = request.method;
 
+    const location = await getLocation(ip);
+
     const now = new Date().toLocaleString("pt-BR", {
       timeZone: "America/Sao_Paulo",
       day: "2-digit", month: "2-digit", year: "numeric",
       hour: "2-digit", minute: "2-digit", second: "2-digit",
     });
 
-    console.log(`[${now}] ${method} ${pathname} | IP: ${ip} | ${device} | ${browser}`);
+    console.log(`[${now}] ${method} ${pathname} | IP: ${ip} | ${location} | ${device} | ${browser}`);
   }
 
   return NextResponse.next();
