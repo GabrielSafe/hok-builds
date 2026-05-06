@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat, Orbitron } from "next/font/google";
 import "./globals.css";
+import GoogleAnalytics from "@/components/layout/GoogleAnalytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable} ${orbitron.variable}`}>
       <body className="min-h-screen text-gray-100 font-sans antialiased" style={{ background: "linear-gradient(160deg,#0B0F17 0%,#0F172A 50%,#0B0F17 100%)", backgroundAttachment: "fixed" }}>
+        <GoogleAnalytics />
         {children}
       </body>
     </html>
