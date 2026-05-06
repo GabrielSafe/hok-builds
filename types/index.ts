@@ -33,6 +33,7 @@ export interface Item {
   description: string | null;
   stats: Record<string, unknown>;
   cost: number;
+  change_type?: "buff" | "nerf" | "adjustment" | null;
 }
 
 export interface Arcana {
@@ -43,6 +44,7 @@ export interface Arcana {
   image_url: string | null;
   description: string | null;
   stats: Record<string, unknown>;
+  change_type?: "buff" | "nerf" | "adjustment" | null;
 }
 
 export interface Spell {
@@ -51,6 +53,7 @@ export interface Spell {
   slug: string;
   image_url: string | null;
   description: string | null;
+  change_type?: "buff" | "nerf" | "adjustment" | null;
 }
 
 export interface Skill {

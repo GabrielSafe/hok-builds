@@ -3,17 +3,42 @@
 import Image from "next/image";
 import type { Build } from "@/types";
 
-interface FlatItem  { item_name: string; item_image_url: string | null; sort_order: number; phase: string; }
-interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; }
-interface FlatSpell  { spell_name: string; spell_image_url: string | null; }
+type ChangeType = "buff" | "nerf" | "adjustment" | null;
+interface FlatItem  { item_name: string; item_image_url: string | null; sort_order: number; phase: string; item_change_type?: ChangeType; }
+interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; arcana_change_type?: ChangeType; }
+interface FlatSpell  { spell_name: string; spell_image_url: string | null; spell_change_type?: ChangeType; }
 interface FlatSkill  { skill_name: string; skill_key: string; skill_image_url: string | null; sort_order: number; }
 
+/* ─── Indicator badge ───────────────────────────────────── */
+function IndicatorBadge({ type }: { type: ChangeType }) {
+  if (!type) return null;
+  const styles: Record<NonNullable<ChangeType>, { bg: string; symbol: string }> = {
+    buff:       { bg: "#22C55E", symbol: "↑" },
+    nerf:       { bg: "#EF4444", symbol: "↓" },
+    adjustment: { bg: "#F97316", symbol: "⏱" },
+  };
+  const s = styles[type];
+  return (
+    <div style={{
+      position: "absolute", top: -2, right: -2,
+      width: 16, height: 16, borderRadius: "50%",
+      background: s.bg, display: "flex", alignItems: "center",
+      justifyContent: "center", fontSize: 9, fontWeight: 900,
+      color: "#fff", zIndex: 10, boxShadow: "0 1px 4px rgba(0,0,0,.6)",
+    }}>
+      {s.symbol}
+    </div>
+  );
+}
+
 /* ─── Item ring ─────────────────────────────────────────── */
-function ItemRing({ name, imageUrl, size = 60 }: { name: string; imageUrl: string | null; size?: number }) {
+function ItemRing({ name, imageUrl, size = 60, changeType }: { name: string; imageUrl: string | null; size?: number; changeType?: ChangeType }) {
   const ring = size + 6;
   return (
     <div className="flex flex-col items-center gap-2" style={{ width: ring + 8 }}>
       {/* Outer ring */}
+      <div style={{ position: "relative" }}>
+      <IndicatorBadge type={changeType ?? null} />
       <div
         style={{
           width: ring,
@@ -47,6 +72,7 @@ function ItemRing({ name, imageUrl, size = 60 }: { name: string; imageUrl: strin
           }
         </div>
       </div>
+      </div>
       <span style={{ fontSize: 10, color: "#A1A1AA", textAlign: "center", lineHeight: 1.3, maxWidth: ring + 8, fontFamily: "var(--font-inter)" }}>
         {name}
       </span>
@@ -55,9 +81,11 @@ function ItemRing({ name, imageUrl, size = 60 }: { name: string; imageUrl: strin
 }
 
 /* ─── Arcana ring ───────────────────────────────────────── */
-function ArcanaRing({ name, imageUrl, qty }: { name: string; imageUrl: string | null; qty: number }) {
+function ArcanaRing({ name, imageUrl, qty, changeType }: { name: string; imageUrl: string | null; qty: number; changeType?: ChangeType }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
+      <div style={{ position: "relative" }}>
+      <IndicatorBadge type={changeType ?? null} />
       <div
         style={{
           width: 54, height: 54, borderRadius: "50%", padding: 3,
@@ -74,6 +102,7 @@ function ArcanaRing({ name, imageUrl, qty }: { name: string; imageUrl: string | 
             : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#FACC15" }}>{name[0]}</div>
           }
         </div>
+      </div>
       </div>
       <span style={{ fontSize: 10, color: "#A1A1AA", fontFamily: "var(--font-inter)" }}>{qty}x</span>
     </div>
@@ -126,9 +155,11 @@ function PhaseSection({ label, highlight = false, children }: { label: string; h
 }
 
 /* ─── Spell frame ───────────────────────────────────────── */
-function SpellFrame({ name, imageUrl }: { name: string; imageUrl: string | null }) {
+function SpellFrame({ name, imageUrl, changeType }: { name: string; imageUrl: string | null; changeType?: ChangeType }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
+      <div style={{ position: "relative" }}>
+      <IndicatorBadge type={changeType ?? null} />
       <div
         style={{
           width: 56, height: 56, borderRadius: 12, padding: 3,
@@ -145,6 +176,7 @@ function SpellFrame({ name, imageUrl }: { name: string; imageUrl: string | null 
             : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#71717A" }}>{name[0]}</div>
           }
         </div>
+      </div>
       </div>
       <span style={{ fontSize: 10, color: "#A1A1AA", fontFamily: "var(--font-inter)" }}>{name}</span>
     </div>
@@ -209,17 +241,17 @@ export default function HeroBuildSection({ build }: { build: Build }) {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start" }}>
                     {startItems.length > 0 && (
                       <PhaseSection label="Item Inicial">
-                        {startItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={54} />)}
+                        {startItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={54} changeType={item.item_change_type} />)}
                       </PhaseSection>
                     )}
                     {coreItems.length > 0 && (
                       <PhaseSection label="Core Items" highlight>
-                        {coreItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={60} />)}
+                        {coreItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={60} changeType={item.item_change_type} />)}
                       </PhaseSection>
                     )}
                     {bootsItems.length > 0 && (
                       <PhaseSection label="Botas">
-                        {bootsItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={54} />)}
+                        {bootsItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={54} changeType={item.item_change_type} />)}
                       </PhaseSection>
                     )}
                   </div>
@@ -228,14 +260,14 @@ export default function HeroBuildSection({ build }: { build: Build }) {
                 {finalItems.length > 0 && (
                   <div style={{ borderTop: "1px solid #27272A", paddingTop: 16 }}>
                     <PhaseSection label="Build Final" highlight>
-                      {finalItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={60} />)}
+                      {finalItems.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={60} changeType={item.item_change_type} />)}
                     </PhaseSection>
                   </div>
                 )}
               </>
             ) : (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
-                {items.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={56} />)}
+                {items.map((item, i) => <ItemRing key={i} name={item.item_name} imageUrl={item.item_image_url} size={56} changeType={item.item_change_type} />)}
               </div>
             )}
           </div>
@@ -249,7 +281,7 @@ export default function HeroBuildSection({ build }: { build: Build }) {
             <div style={card}>
               <div style={cardHeader}><span style={sectionLabel}>Arcana</span></div>
               <div style={{ padding: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
-                {arcana.map((a, i) => <ArcanaRing key={i} name={a.arcana_name} imageUrl={a.arcana_image_url} qty={a.quantity} />)}
+                {arcana.map((a, i) => <ArcanaRing key={i} name={a.arcana_name} imageUrl={a.arcana_image_url} qty={a.quantity} changeType={a.arcana_change_type} />)}
               </div>
             </div>
           )}
@@ -257,7 +289,7 @@ export default function HeroBuildSection({ build }: { build: Build }) {
             <div style={card}>
               <div style={cardHeader}><span style={sectionLabel}>Feitiços</span></div>
               <div style={{ padding: 20, display: "flex", gap: 12, alignItems: "flex-end" }}>
-                {spells.map((s, i) => <SpellFrame key={i} name={s.spell_name} imageUrl={s.spell_image_url} />)}
+                {spells.map((s, i) => <SpellFrame key={i} name={s.spell_name} imageUrl={s.spell_image_url} changeType={s.spell_change_type} />)}
               </div>
             </div>
           )}

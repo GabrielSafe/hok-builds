@@ -34,19 +34,19 @@ async function getHeroData(slug: string) {
   if (build) {
     const [items, arcana, spells, skillOrder] = await Promise.all([
       query(
-        `SELECT bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.slug AS item_slug
+        `SELECT bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.slug AS item_slug, i.change_type AS item_change_type
          FROM build_items bi JOIN items i ON i.id = bi.item_id
          WHERE bi.build_id = $1 ORDER BY bi.sort_order ASC`,
         [build.id]
       ),
       query(
-        `SELECT ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.tier AS arcana_tier
+        `SELECT ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.tier AS arcana_tier, a.change_type AS arcana_change_type
          FROM build_arcana ba JOIN arcana a ON a.id = ba.arcana_id
          WHERE ba.build_id = $1`,
         [build.id]
       ),
       query(
-        `SELECT s.name AS spell_name, s.image_url AS spell_image_url
+        `SELECT s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type
          FROM build_spells bs JOIN spells s ON s.id = bs.spell_id
          WHERE bs.build_id = $1`,
         [build.id]
