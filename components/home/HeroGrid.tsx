@@ -152,7 +152,7 @@ function HeroCard({ hero, onHover }: { hero: Hero; onHover?: (h: Hero | null) =>
               <span className="text-xl font-black text-dark-400">{hero.name[0]}</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
         </div>
         <div className="px-1 pb-1.5 pt-1">
           <p className="text-[11px] font-semibold text-gray-300 truncate text-center leading-tight group-hover:text-gold-400 transition-colors">
