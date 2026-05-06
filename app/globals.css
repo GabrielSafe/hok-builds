@@ -7,13 +7,17 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: linear-gradient(160deg, #0B0F17 0%, #0F172A 50%, #0B0F17 100%);
-  background-attachment: fixed;
+  background-color: #0B0F17;
   color: #F4F4F5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  overflow-x: hidden;
 }
+
+/* ─── Hide scrollbar utility ─────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ─── Scrollbar ───────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 5px; height: 5px; }

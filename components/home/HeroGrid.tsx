@@ -61,13 +61,13 @@ export default function HeroGrid({ onHeroHover }: Props) {
       </div>
 
       {/* Filters row */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 flex-1 min-w-0 scrollbar-hide">
           {ROLES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRole(r.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-semibold tracking-wide transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-semibold tracking-wide transition-all shrink-0 ${
                 role === r.value
                   ? "bg-gold-500 text-dark-900"
                   : "bg-dark-700 text-gray-400 hover:text-white border border-dark-600 hover:border-dark-400"
