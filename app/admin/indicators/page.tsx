@@ -1,5 +1,5 @@
 import { query } from "@/lib/db";
-import IndicatorManager from "@/components/admin/IndicatorManager";
+import IndicatorManager, { type IndicatorEntity } from "@/components/admin/IndicatorManager";
 import IndicatorTabs from "@/components/admin/IndicatorTabs";
 import type { Hero, Item, Spell, Arcana } from "@/types";
 
@@ -57,7 +57,7 @@ export default async function AdminIndicatorsPage({
     { key: "arcana",  label: "Arcanas",  count: arcana.length },
   ];
 
-  const entityMap: Record<string, { entities: typeof heroEntities; apiPath: string }> = {
+  const entityMap: Record<string, { entities: IndicatorEntity[]; apiPath: string }> = {
     heroes: { entities: heroEntities, apiPath: "heroes" },
     items:  { entities: itemEntities, apiPath: "items" },
     spells: { entities: spellEntities, apiPath: "spells" },
