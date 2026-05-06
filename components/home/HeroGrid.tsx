@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Eye } from "lucide-react";
-import { TankIcon, FighterIcon, AssassinIcon, MageIcon, MarksmanIcon, SupportIcon } from "./RoleIcons";
+import { TankIcon, FighterIcon, AssassinIcon, MageIcon, MarksmanIcon, SupportIcon, JungleIcon } from "./RoleIcons";
 import { formatNumber } from "@/lib/utils";
 import type { Hero, HeroRole } from "@/types";
 
@@ -16,6 +16,7 @@ const ROLES: Array<{ label: string; value: HeroRole | "ALL"; icon: React.ReactNo
   { label: "Mago", value: "Mage", icon: <MageIcon size={14} /> },
   { label: "Atirador", value: "Marksman", icon: <MarksmanIcon size={14} /> },
   { label: "Suporte", value: "Support", icon: <SupportIcon size={14} /> },
+  { label: "Jungle", value: "Jungle", icon: <JungleIcon size={14} /> },
 ];
 
 const SORT_OPTIONS = [

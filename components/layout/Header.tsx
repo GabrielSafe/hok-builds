@@ -96,7 +96,7 @@ export default function Header() {
                   )}
                   <div>
                     <p className="text-sm font-semibold text-white font-heading">{hero.name}</p>
-                    <p className="text-xs text-gray-500">{hero.role}</p>
+                    <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
                   </div>
                 </Link>
               ))}

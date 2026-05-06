@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured } = body;
 
-    if (!name || !role) {
+    if (!name || !role || !Array.isArray(role) || role.length === 0) {
       return NextResponse.json({ error: "name e role obrigatórios" }, { status: 400 });
     }
 

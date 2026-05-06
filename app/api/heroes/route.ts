@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   let idx = 1;
 
   if (role) {
-    sql += ` AND h.role = $${idx++}`;
+    sql += ` AND $${idx++} = ANY(h.role)`;
     params.push(role);
   }
 

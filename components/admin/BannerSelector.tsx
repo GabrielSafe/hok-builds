@@ -92,7 +92,7 @@ export default function BannerSelector({ heroes, featuredIds: initial }: Props) 
                   <p className="text-xs font-semibold text-white truncate">{hero.name}</p>
                   {isFeatured && <Star size={12} className="text-gold-400 shrink-0 fill-gold-400" />}
                 </div>
-                <p className="text-[10px] text-gray-500">{hero.role}</p>
+                <p className="text-[10px] text-gray-500">{hero.role.join(" / ")}</p>
               </div>
             </button>
           );

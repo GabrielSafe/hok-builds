@@ -48,3 +48,13 @@ export function SupportIcon({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+
+export function JungleIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 22v-5" /><path d="M17 13V9" />
+      <path d="M17 9c0-4-4-7-4-7S9 5 9 9c0 2.4 1.5 4.4 3 5.7V22" />
+      <path d="M14 15.3c1.5-1.3 3-3.3 3-5.3" />
+    </svg>
+  );
+}

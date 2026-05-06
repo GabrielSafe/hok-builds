@@ -8,6 +8,7 @@ const roleColors: Record<HeroRole, string> = {
   Mage: "bg-indigo-900/60 text-indigo-300 border-indigo-700",
   Marksman: "bg-green-900/60 text-green-300 border-green-700",
   Support: "bg-teal-900/60 text-teal-300 border-teal-700",
+  Jungle: "bg-emerald-900/60 text-emerald-300 border-emerald-700",
 };
 
 const roleLabels: Record<HeroRole, string> = {
@@ -17,23 +18,29 @@ const roleLabels: Record<HeroRole, string> = {
   Mage: "Mago",
   Marksman: "Atirador",
   Support: "Suporte",
+  Jungle: "Jungle",
 };
 
 interface Props {
-  role: HeroRole;
+  role: HeroRole[];
   size?: "sm" | "md";
 }
 
 export default function RoleBadge({ role, size = "sm" }: Props) {
   return (
-    <span
-      className={cn(
-        "inline-block font-semibold border rounded-full",
-        roleColors[role],
-        size === "sm" ? "text-xs px-2 py-0.5" : "text-sm px-3 py-1"
-      )}
-    >
-      {roleLabels[role]}
-    </span>
+    <div className="flex flex-wrap gap-1">
+      {role.map((r) => (
+        <span
+          key={r}
+          className={cn(
+            "inline-block font-semibold border rounded-full",
+            roleColors[r] ?? "bg-gray-800 text-gray-300 border-gray-600",
+            size === "sm" ? "text-xs px-2 py-0.5" : "text-sm px-3 py-1"
+          )}
+        >
+          {roleLabels[r] ?? r}
+        </span>
+      ))}
+    </div>
   );
 }

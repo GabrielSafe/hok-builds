@@ -1,10 +1,10 @@
-export type HeroRole = "Tank" | "Fighter" | "Assassin" | "Mage" | "Marksman" | "Support";
+export type HeroRole = "Tank" | "Fighter" | "Assassin" | "Mage" | "Marksman" | "Support" | "Jungle";
 
 export interface Hero {
   id: number;
   name: string;
   slug: string;
-  role: HeroRole;
+  role: HeroRole[];
   difficulty: number;
   description: string | null;
   lore: string | null;

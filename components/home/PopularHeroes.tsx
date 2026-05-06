@@ -52,7 +52,7 @@ export default async function PopularHeroes() {
               <p className="text-sm font-medium text-white truncate group-hover:text-gold-400 transition-colors">
                 {hero.name}
               </p>
-              <p className="text-xs text-gray-500">{hero.role}</p>
+              <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
             </div>
 
             <div className="flex items-center gap-1 text-xs text-gray-500 shrink-0">

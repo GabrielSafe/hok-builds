@@ -42,7 +42,7 @@ export default async function AdminBannerPage() {
                 )}
                 <div>
                   <p className="font-bold text-white text-sm">{hero.name}</p>
-                  <p className="text-xs text-gray-500">{hero.role}</p>
+                  <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
                 </div>
               </div>
             ))}

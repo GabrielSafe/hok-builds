@@ -11,7 +11,7 @@ interface QuickHero {
   id: number;
   name: string;
   slug: string;
-  role: HeroRole;
+  role: HeroRole[];
   difficulty: number;
   description: string | null;
   icon_url: string | null;
@@ -38,7 +38,7 @@ const TIER_COLORS: Record<string, string> = {
 
 const ROLE_LABELS: Record<string, string> = {
   Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
-  Mage: "Mago", Marksman: "Atirador", Support: "Suporte",
+  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Jungle",
 };
 
 interface Props {
@@ -86,7 +86,7 @@ export default function HeroQuickView({ heroId }: Props) {
             )}
             <div>
               <h3 className="text-lg font-black text-white">{hero.name}</h3>
-              <p className="text-xs text-gray-400">{ROLE_LABELS[hero.role]}</p>
+              <p className="text-xs text-gray-400">{hero.role.map((r) => ROLE_LABELS[r] ?? r).join(" / ")}</p>
               <div className="flex gap-0.5 mt-1.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className={`w-2 h-2 rounded-full ${i < hero.difficulty ? "bg-gold-400" : "bg-dark-500"}`} />

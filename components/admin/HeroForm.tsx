@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
 import type { Hero, HeroRole } from "@/types";
 
-const ROLES: HeroRole[] = ["Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support"];
+const ROLES: HeroRole[] = ["Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support", "Jungle"];
+
+const ROLE_LABELS: Record<HeroRole, string> = {
+  Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
+  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Jungle",
+};
 
 interface Props {
   hero?: Hero;
@@ -22,7 +27,7 @@ export default function HeroForm({ hero }: Props) {
 
   const [form, setForm] = useState({
     name: hero?.name ?? "",
-    role: hero?.role ?? ("Marksman" as HeroRole),
+    role: hero?.role ?? (["Marksman"] as HeroRole[]),
     difficulty: hero?.difficulty ?? 1,
     description: hero?.description ?? "",
     lore: hero?.lore ?? "",
@@ -110,13 +115,31 @@ export default function HeroForm({ hero }: Props) {
         </Field>
 
         <Field label="Função *">
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value as HeroRole })}
-            className="input"
-          >
-            {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
+          <div className="flex flex-wrap gap-1.5">
+            {ROLES.map((r) => {
+              const active = (form.role as HeroRole[]).includes(r);
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => {
+                    const current = form.role as HeroRole[];
+                    const next = active
+                      ? current.filter((x) => x !== r)
+                      : [...current, r];
+                    if (next.length > 0) setForm({ ...form, role: next });
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all ${
+                    active
+                      ? "border-gold-500 text-gold-400 bg-gold-500/10"
+                      : "border-dark-500 text-gray-500 hover:border-gold-500/40"
+                  }`}
+                >
+                  {ROLE_LABELS[r]}
+                </button>
+              );
+            })}
+          </div>
         </Field>
       </div>
 
