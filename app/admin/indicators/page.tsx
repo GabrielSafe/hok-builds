@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { formatRoles } from "@/lib/utils";
 import IndicatorManager, { type IndicatorEntity } from "@/components/admin/IndicatorManager";
 import IndicatorTabs from "@/components/admin/IndicatorTabs";
 import type { Hero, Item, Spell, Arcana } from "@/types";
@@ -23,7 +24,7 @@ export default async function AdminIndicatorsPage({
     id: h.id,
     name: h.name,
     image_url: h.icon_url,
-    subtitle: h.role.join(" / "),
+    subtitle: formatRoles(h.role),
     change_type: h.change_type,
   }));
 

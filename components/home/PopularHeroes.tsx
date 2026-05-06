@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Eye } from "lucide-react";
 import { query } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, formatRoles } from "@/lib/utils";
 import type { Hero } from "@/types";
 
 async function getPopularHeroes(): Promise<Hero[]> {
@@ -52,7 +52,7 @@ export default async function PopularHeroes() {
               <p className="text-sm font-medium text-white truncate group-hover:text-gold-400 transition-colors">
                 {hero.name}
               </p>
-              <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
+              <p className="text-xs text-gray-500">{formatRoles(hero.role)}</p>
             </div>
 
             <div className="flex items-center gap-1 text-xs text-gray-500 shrink-0">

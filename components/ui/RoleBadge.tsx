@@ -18,7 +18,7 @@ const roleLabels: Record<HeroRole, string> = {
   Mage: "Mago",
   Marksman: "Atirador",
   Support: "Suporte",
-  Jungle: "Jungle",
+  Jungle: "Selva",
 };
 
 interface Props {

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, X, Menu } from "lucide-react";
 import type { Hero } from "@/types";
+import { formatRoles } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/", label: "Início" },
@@ -96,7 +97,7 @@ export default function Header() {
                   )}
                   <div>
                     <p className="text-sm font-semibold text-white font-heading">{hero.name}</p>
-                    <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
+                    <p className="text-xs text-gray-500">{formatRoles(hero.role)}</p>
                   </div>
                 </Link>
               ))}

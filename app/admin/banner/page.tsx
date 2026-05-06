@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { formatRoles } from "@/lib/utils";
 import Image from "next/image";
 import BannerSelector from "@/components/admin/BannerSelector";
 import type { Hero } from "@/types";
@@ -42,7 +43,7 @@ export default async function AdminBannerPage() {
                 )}
                 <div>
                   <p className="font-bold text-white text-sm">{hero.name}</p>
-                  <p className="text-xs text-gray-500">{hero.role.join(" / ")}</p>
+                  <p className="text-xs text-gray-500">{formatRoles(hero.role)}</p>
                 </div>
               </div>
             ))}

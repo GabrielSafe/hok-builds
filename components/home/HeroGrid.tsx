@@ -16,7 +16,7 @@ const ROLES: Array<{ label: string; value: HeroRole | "ALL"; icon: React.ReactNo
   { label: "Mago", value: "Mage", icon: <MageIcon size={14} /> },
   { label: "Atirador", value: "Marksman", icon: <MarksmanIcon size={14} /> },
   { label: "Suporte", value: "Support", icon: <SupportIcon size={14} /> },
-  { label: "Jungle", value: "Jungle", icon: <JungleIcon size={14} /> },
+  { label: "Selva", value: "Jungle", icon: <JungleIcon size={14} /> },
 ];
 
 const SORT_OPTIONS = [

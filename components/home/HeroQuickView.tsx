@@ -38,7 +38,7 @@ const TIER_COLORS: Record<string, string> = {
 
 const ROLE_LABELS: Record<string, string> = {
   Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
-  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Jungle",
+  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Selva",
 };
 
 interface Props {

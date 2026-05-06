@@ -27,6 +27,20 @@ export function formatPercent(n: number | string): string {
   return `${num.toFixed(1)}%`;
 }
 
+export const ROLE_LABELS: Record<string, string> = {
+  Tank:     "Tanque",
+  Fighter:  "Lutador",
+  Assassin: "Assassino",
+  Mage:     "Mago",
+  Marksman: "Atirador",
+  Support:  "Suporte",
+  Jungle:   "Selva",
+};
+
+export function formatRoles(roles: string[]): string {
+  return roles.map((r) => ROLE_LABELS[r] ?? r).join(" / ");
+}
+
 export function hashIp(ip: string): string {
   let hash = 0;
   for (let i = 0; i < ip.length; i++) {

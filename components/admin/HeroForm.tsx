@@ -9,7 +9,7 @@ const ROLES: HeroRole[] = ["Tank", "Fighter", "Assassin", "Mage", "Marksman", "S
 
 const ROLE_LABELS: Record<HeroRole, string> = {
   Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
-  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Jungle",
+  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Selva",
 };
 
 interface Props {

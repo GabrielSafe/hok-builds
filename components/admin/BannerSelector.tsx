@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import type { Hero } from "@/types";
+import { formatRoles } from "@/lib/utils";
 
 interface Props {
   heroes: Hero[];
@@ -92,7 +93,7 @@ export default function BannerSelector({ heroes, featuredIds: initial }: Props) 
                   <p className="text-xs font-semibold text-white truncate">{hero.name}</p>
                   {isFeatured && <Star size={12} className="text-gold-400 shrink-0 fill-gold-400" />}
                 </div>
-                <p className="text-[10px] text-gray-500">{hero.role.join(" / ")}</p>
+                <p className="text-[10px] text-gray-500">{formatRoles(hero.role)}</p>
               </div>
             </button>
           );
