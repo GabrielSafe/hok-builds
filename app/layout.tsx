@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Montserrat, Orbitron } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "@/components/layout/GoogleAnalytics";
+import LoadingScreen from "@/components/layout/LoadingScreen";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable} ${orbitron.variable}`}>
       <body className="min-h-screen text-gray-100 font-sans antialiased bg-[#0B0F17]">
         <GoogleAnalytics />
+        <LoadingScreen />
         {children}
       </body>
     </html>
