@@ -15,6 +15,7 @@ export interface Hero {
   created_at: string;
   updated_at: string;
   total_views?: number;
+  change_type?: "buff" | "nerf" | "adjustment" | null;
 }
 
 export interface HeroStats {

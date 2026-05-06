@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Eye } from "lucide-react";
+import { ChevronDown, Eye, TrendingUp, TrendingDown, Clock } from "lucide-react";
 import { TankIcon, FighterIcon, AssassinIcon, MageIcon, MarksmanIcon, SupportIcon, JungleIcon } from "./RoleIcons";
 import { formatNumber } from "@/lib/utils";
 import type { Hero, HeroRole } from "@/types";
@@ -154,6 +154,21 @@ function HeroCard({ hero, onHover }: { hero: Hero; onHover?: (h: Hero | null) =>
             </div>
           )}
 
+          {hero.change_type === "buff" && (
+            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+              <TrendingUp size={11} className="text-white" strokeWidth={3} />
+            </div>
+          )}
+          {hero.change_type === "nerf" && (
+            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+              <TrendingDown size={11} className="text-white" strokeWidth={3} />
+            </div>
+          )}
+          {hero.change_type === "adjustment" && (
+            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+              <Clock size={11} className="text-white" strokeWidth={3} />
+            </div>
+          )}
         </div>
         <div className="px-1 pb-1.5 pt-1">
           <p className="text-[11px] font-semibold text-gray-300 truncate text-center leading-tight group-hover:text-gold-400 transition-colors">
