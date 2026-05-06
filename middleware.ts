@@ -51,9 +51,22 @@ export async function middleware(request: NextRequest) {
 
   // ── Request logging ─────────────────────────────────────
   if (!SKIP.test(pathname)) {
+    // DEBUG temporário — remove depois
+    if (pathname === "/") {
+      console.log("DEBUG HEADERS:", JSON.stringify({
+        "x-forwarded-for":   request.headers.get("x-forwarded-for"),
+        "x-real-ip":         request.headers.get("x-real-ip"),
+        "x-client-ip":       request.headers.get("x-client-ip"),
+        "cf-connecting-ip":  request.headers.get("cf-connecting-ip"),
+        "true-client-ip":    request.headers.get("true-client-ip"),
+        "x-cluster-client-ip": request.headers.get("x-cluster-client-ip"),
+      }));
+    }
+
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       request.headers.get("x-real-ip") ??
+      request.headers.get("x-client-ip") ??
       "unknown";
 
     const ua = request.headers.get("user-agent") ?? "";
