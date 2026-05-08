@@ -35,6 +35,12 @@ export default function HeroForm({ hero }: Props) {
     is_featured: hero?.is_featured ?? false,
     icon_url: hero?.icon_url ?? "",
     splash_url: hero?.splash_url ?? "",
+    race: hero?.race ?? "",
+    height: hero?.height ?? "",
+    fighting_style: hero?.fighting_style ?? "",
+    origin_place: hero?.origin_place ?? "",
+    faction: hero?.faction ?? "",
+    lore_role: hero?.lore_role ?? "",
   });
 
   function handleFileChange(
@@ -171,6 +177,31 @@ export default function HeroForm({ hero }: Props) {
           className="input resize-none"
         />
       </Field>
+
+      {/* Bio */}
+      <div className="border border-dark-600 rounded-xl p-4 space-y-3">
+        <p className="text-xs font-bold text-gold-400 uppercase tracking-wider">Informações do Personagem <span className="text-gray-600 normal-case font-normal">(opcionais)</span></p>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Raça / Espécie">
+            <input type="text" value={form.race} onChange={e => setForm({ ...form, race: e.target.value })} placeholder="Ex: Humano" className="input" />
+          </Field>
+          <Field label="Altura">
+            <input type="text" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} placeholder="Ex: 179 cm" className="input" />
+          </Field>
+          <Field label="Estilo de Combate">
+            <input type="text" value={form.fighting_style} onChange={e => setForm({ ...form, fighting_style: e.target.value })} placeholder="Ex: Artes marciais" className="input" />
+          </Field>
+          <Field label="Origem">
+            <input type="text" value={form.origin_place} onChange={e => setForm({ ...form, origin_place: e.target.value })} placeholder="Ex: Navênia" className="input" />
+          </Field>
+          <Field label="Facção / Clã">
+            <input type="text" value={form.faction} onChange={e => setForm({ ...form, faction: e.target.value })} placeholder="Ex: Clãs de Navênia" className="input" />
+          </Field>
+          <Field label="Papel no Lore">
+            <input type="text" value={form.lore_role} onChange={e => setForm({ ...form, lore_role: e.target.value })} placeholder="Ex: Explorador" className="input" />
+          </Field>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <ImageUpload

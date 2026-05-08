@@ -4,6 +4,18 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus, Trash2, Save, Upload } from "lucide-react";
 
+const SKILL_TAGS = [
+  { value: "Dano",       color: "bg-red-900/60 text-red-300 border-red-700" },
+  { value: "Marca",      color: "bg-blue-900/60 text-blue-300 border-blue-700" },
+  { value: "Movimento",  color: "bg-green-900/60 text-green-300 border-green-700" },
+  { value: "Aceleração", color: "bg-cyan-900/60 text-cyan-300 border-cyan-700" },
+  { value: "Melhora",    color: "bg-amber-900/60 text-amber-300 border-amber-700" },
+  { value: "Controle",   color: "bg-purple-900/60 text-purple-300 border-purple-700" },
+  { value: "Cura",       color: "bg-emerald-900/60 text-emerald-300 border-emerald-700" },
+  { value: "Escudo",     color: "bg-slate-700/60 text-slate-300 border-slate-500" },
+  { value: "Passivo",    color: "bg-gray-700/60 text-gray-400 border-gray-600" },
+];
+
 interface Skill {
   id?: number;
   key: string;
@@ -11,6 +23,7 @@ interface Skill {
   description: string;
   image_url: string | null;
   sort_order: number;
+  tags: string[];
   imageFile?: File;
   imagePreview?: string;
   saving?: boolean;
@@ -25,7 +38,7 @@ const DEFAULT_KEYS = [
 ];
 
 function emptySkill(key: string, order: number, isExtra = false): Skill {
-  return { key, name: "", description: "", image_url: null, sort_order: order, isExtra };
+  return { key, name: "", description: "", image_url: null, sort_order: order, tags: [], isExtra };
 }
 
 export default function SkillsEditor({ heroId, heroSlug }: { heroId: number; heroSlug: string }) {
@@ -43,13 +56,14 @@ export default function SkillsEditor({ heroId, heroSlug }: { heroId: number; her
     const defaultSlots: Skill[] = DEFAULT_KEYS.map(dk => {
       const saved = data.find(d => d.key === dk.key);
       return saved
-        ? { ...saved, imagePreview: saved.image_url ?? undefined }
+        ? { ...saved, tags: saved.tags ?? [], imagePreview: saved.image_url ?? undefined }
         : emptySkill(dk.key, dk.order);
     });
 
     const extraSaved = data.filter(d => !DEFAULT_KEYS.find(dk => dk.key === d.key));
     const extras: Skill[] = extraSaved.map(d => ({
       ...d,
+      tags: d.tags ?? [],
       imagePreview: d.image_url ?? undefined,
       isExtra: true,
     }));
@@ -72,6 +86,14 @@ export default function SkillsEditor({ heroId, heroSlug }: { heroId: number; her
 
   function handleChange(index: number, field: "name" | "description" | "key", value: string) {
     setSkills(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
+  }
+
+  function toggleTag(index: number, tag: string) {
+    setSkills(prev => prev.map((s, i) => {
+      if (i !== index) return s;
+      const has = s.tags.includes(tag);
+      return { ...s, tags: has ? s.tags.filter(t => t !== tag) : [...s.tags, tag] };
+    }));
   }
 
   async function uploadImage(file: File, key: string): Promise<string> {
@@ -102,6 +124,7 @@ export default function SkillsEditor({ heroId, heroSlug }: { heroId: number; her
         description: skill.description,
         image_url: imageUrl,
         sort_order: skill.sort_order,
+        tags: skill.tags,
       };
 
       const res = await fetch(`/api/admin/skills/${heroId}`, {
@@ -214,14 +237,40 @@ export default function SkillsEditor({ heroId, heroSlug }: { heroId: number; her
                     className="input"
                   />
                 </div>
+
+                {/* Tags */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1 font-heading">Descrição</label>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-heading">Tipos</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {SKILL_TAGS.map(tag => {
+                      const active = skill.tags.includes(tag.value);
+                      return (
+                        <button
+                          key={tag.value}
+                          type="button"
+                          onClick={() => toggleTag(index, tag.value)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all ${
+                            active ? tag.color : "bg-dark-600 text-gray-600 border-dark-500 hover:border-dark-400"
+                          }`}
+                        >
+                          {tag.value}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1 font-heading">
+                    Descrição
+                    <span className="text-gray-600 font-normal ml-1">— use {"{dano}"}, {"{movimento}"}, {"{melhora}"}, {"{controle}"}, {"{cura}"} para colorir</span>
+                  </label>
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={skill.description}
                     onChange={e => handleChange(index, "description", e.target.value)}
-                    placeholder="Efeito da habilidade..."
-                    className="input resize-none"
+                    placeholder="Ex: Causa {dano}dano real{/dano} e aumenta {movimento}velocidade{/movimento}..."
+                    className="input resize-none text-xs"
                   />
                 </div>
               </div>

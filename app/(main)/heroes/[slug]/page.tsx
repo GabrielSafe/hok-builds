@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronLeft, Eye, Shield } from "lucide-react";
+import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass } from "lucide-react";
 import ViewTracker from "@/components/hero/ViewTracker";
 import HeroBuildSection from "@/components/hero/HeroBuildSection";
 import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
@@ -172,6 +172,58 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           <div className="space-y-4">
             {skills.length > 0 && <HeroSkillsSection skills={skills} />}
 
+            {/* Bio card */}
+            {(hero.race || hero.height || hero.fighting_style || hero.origin_place || hero.faction || hero.lore_role) && (
+              <div className="rounded-xl overflow-hidden border border-dark-600" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)" }}>
+                <div className="px-5 py-3 border-b border-dark-600">
+                  <p className="section-label">Informações</p>
+                </div>
+                <div className="p-4 space-y-3">
+                  {hero.race && (
+                    <div className="flex items-center gap-3">
+                      <User size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Raça</span>
+                      <span className="text-xs text-white font-medium">{hero.race}</span>
+                    </div>
+                  )}
+                  {hero.height && (
+                    <div className="flex items-center gap-3">
+                      <Ruler size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Altura</span>
+                      <span className="text-xs text-white font-medium">{hero.height}</span>
+                    </div>
+                  )}
+                  {hero.fighting_style && (
+                    <div className="flex items-center gap-3">
+                      <Zap size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Estilo</span>
+                      <span className="text-xs text-white font-medium">{hero.fighting_style}</span>
+                    </div>
+                  )}
+                  {hero.origin_place && (
+                    <div className="flex items-center gap-3">
+                      <MapPin size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Origem</span>
+                      <span className="text-xs text-white font-medium">{hero.origin_place}</span>
+                    </div>
+                  )}
+                  {hero.faction && (
+                    <div className="flex items-center gap-3">
+                      <Users size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Facção</span>
+                      <span className="text-xs text-white font-medium">{hero.faction}</span>
+                    </div>
+                  )}
+                  {hero.lore_role && (
+                    <div className="flex items-center gap-3">
+                      <Compass size={14} className="text-gold-400 shrink-0" />
+                      <span className="text-xs text-gray-400 w-24 shrink-0">Papel</span>
+                      <span className="text-xs text-white font-medium">{hero.lore_role}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

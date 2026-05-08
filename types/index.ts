@@ -16,6 +16,12 @@ export interface Hero {
   updated_at: string;
   total_views?: number;
   change_type?: "buff" | "nerf" | "adjustment" | null;
+  race?: string | null;
+  height?: string | null;
+  fighting_style?: string | null;
+  origin_place?: string | null;
+  faction?: string | null;
+  lore_role?: string | null;
 }
 
 export interface HeroStats {
@@ -64,6 +70,7 @@ export interface Skill {
   image_url: string | null;
   description: string | null;
   sort_order: number;
+  tags?: string[] | null;
 }
 
 export interface Build {
