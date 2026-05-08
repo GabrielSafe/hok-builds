@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Eye, TrendingUp, TrendingDown, Clock } from "lucide-react";
@@ -30,28 +30,27 @@ interface Props {
 }
 
 export default function HeroGrid({ onHeroHover }: Props) {
-  const [heroes, setHeroes] = useState<Hero[]>([]);
+  const [allHeroes, setAllHeroes] = useState<Hero[]>([]);
   const [role, setRole] = useState<HeroRole | "ALL">("ALL");
   const [sort, setSort] = useState("az");
   const [loading, setLoading] = useState(true);
   const [sortOpen, setSortOpen] = useState(false);
 
-  const fetchHeroes = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (role !== "ALL") params.set("role", role);
-    params.set("limit", "100");
-    const res = await fetch(`/api/heroes?${params}`);
-    let data: Hero[] = await res.json();
+  // Carrega todos os heróis uma única vez
+  useEffect(() => {
+    fetch("/api/heroes?limit=200")
+      .then(r => r.json())
+      .then((data: Hero[]) => { setAllHeroes(data); setLoading(false); });
+  }, []);
 
+  // Filtra e ordena no browser — sem nova requisição
+  const heroes = useMemo(() => {
+    let data = role === "ALL" ? allHeroes : allHeroes.filter(h => h.role.includes(role as HeroRole));
     if (sort === "za") data = [...data].sort((a, b) => b.name.localeCompare(a.name));
     else if (sort === "views") data = [...data].sort((a, b) => (b.total_views ?? 0) - (a.total_views ?? 0));
-
-    setHeroes(data);
-    setLoading(false);
-  }, [role, sort]);
-
-  useEffect(() => { fetchHeroes(); }, [fetchHeroes]);
+    else data = [...data].sort((a, b) => a.name.localeCompare(b.name));
+    return data;
+  }, [allHeroes, role, sort]);
 
   return (
     <section className="py-8">
