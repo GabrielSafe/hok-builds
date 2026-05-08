@@ -115,11 +115,12 @@ export default function HeroGrid({ onHeroHover }: Props) {
       ) : heroes.length === 0 ? (
         <div className="text-center py-16 text-gray-500 text-sm">Nenhum herói encontrado.</div>
       ) : (
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
-          {heroes.map((hero) => (
+        <div key={`${role}-${sort}`} className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
+          {heroes.map((hero, index) => (
             <HeroCard
               key={hero.id}
               hero={hero}
+              index={index}
               onHover={onHeroHover}
             />
           ))}
@@ -129,11 +130,12 @@ export default function HeroGrid({ onHeroHover }: Props) {
   );
 }
 
-function HeroCard({ hero, onHover }: { hero: Hero; onHover?: (h: Hero | null) => void }) {
+function HeroCard({ hero, index, onHover }: { hero: Hero; index: number; onHover?: (h: Hero | null) => void }) {
   return (
     <Link
       href={`/heroes/${hero.slug}`}
-      className="group block"
+      className="hero-card-animate group block"
+      style={{ animationDelay: `${Math.min(index * 25, 400)}ms` }}
       onMouseEnter={() => onHover?.(hero)}
       onMouseLeave={() => onHover?.(null)}
     >
