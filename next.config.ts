@@ -4,6 +4,7 @@ const SUPABASE_BASE = "https://shebnxyhiguhzosxeftm.supabase.co/storage/v1/objec
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
