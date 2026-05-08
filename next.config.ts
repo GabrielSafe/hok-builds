@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const SUPABASE_BASE = "https://shebnxyhiguhzosxeftm.supabase.co/storage/v1/object/public/hok-assets";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -14,6 +16,15 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/img/:path*",
+        destination: `${SUPABASE_BASE}/:path*`,
+        permanent: false,
+      },
+    ];
   },
 };
 
