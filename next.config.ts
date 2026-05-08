@@ -4,19 +4,8 @@ const SUPABASE_BASE = "https://shebnxyhiguhzosxeftm.supabase.co/storage/v1/objec
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
-      },
-      {
-        protocol: "https",
-        hostname: "*.supabase.com",
-        pathname: "/storage/v1/object/public/**",
-      },
-    ],
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.ts",
   },
   async redirects() {
     return [
