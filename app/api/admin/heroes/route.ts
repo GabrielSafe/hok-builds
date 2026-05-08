@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
   try {
     await requireAuth();
     const body = await request.json();
-    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured } = body;
+    const { name, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured,
+            race, height, fighting_style, origin_place, faction, lore_role } = body;
 
     if (!name || !role || !Array.isArray(role) || role.length === 0) {
       return NextResponse.json({ error: "name e role obrigatórios" }, { status: 400 });
@@ -37,10 +38,12 @@ export async function POST(request: NextRequest) {
     }
 
     const hero = await queryOne(
-      `INSERT INTO heroes (name, slug, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO heroes (name, slug, role, difficulty, description, lore, icon_url, splash_url, is_published, is_featured,
+                           race, height, fighting_style, origin_place, faction, lore_role)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
        RETURNING *`,
-      [name, slug, role, difficulty ?? 1, description, lore, icon_url, splash_url, is_published ?? false, is_featured ?? false]
+      [name, slug, role, difficulty ?? 1, description, lore, icon_url, splash_url, is_published ?? false, is_featured ?? false,
+       race ?? null, height ?? null, fighting_style ?? null, origin_place ?? null, faction ?? null, lore_role ?? null]
     );
 
     await query(
