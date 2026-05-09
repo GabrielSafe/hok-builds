@@ -74,6 +74,30 @@ export interface Skill {
   tags?: string[] | null;
 }
 
+export interface ProPlayer {
+  id: number;
+  name: string;
+  slug: string;
+  main_role: string | null;
+  avatar_url: string | null;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface HeroCounter {
+  id: number;
+  hero_id: number;
+  counter_hero_id: number;
+  type: "strong_against" | "weak_against";
+  counter_hero?: {
+    id: number;
+    name: string;
+    slug: string;
+    icon_url: string | null;
+  };
+}
+
 export interface Build {
   id: number;
   hero_id: number;
@@ -81,6 +105,8 @@ export interface Build {
   description: string | null;
   patch_version: string | null;
   is_recommended: boolean;
+  pro_player_id: number | null;
+  pro_player?: ProPlayer | null;
   created_at: string;
   updated_at: string;
   items?: BuildItem[];

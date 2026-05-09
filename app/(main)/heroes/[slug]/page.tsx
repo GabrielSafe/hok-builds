@@ -4,64 +4,57 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass, BookOpen, Heart } from "lucide-react";
 import ViewTracker from "@/components/hero/ViewTracker";
-import HeroBuildSection from "@/components/hero/HeroBuildSection";
+import HeroBuildSwitcher from "@/components/hero/HeroBuildSwitcher";
 import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
 import RoleBadge from "@/components/ui/RoleBadge";
 import DifficultyStars from "@/components/ui/DifficultyStars";
 import { query, queryOne } from "@/lib/db";
 import { formatNumber } from "@/lib/utils";
-import type { Hero, HeroStats, Skill, Build } from "@/types";
+import type { Hero, HeroStats, Skill, Build, HeroCounter } from "@/types";
 
 export const dynamic = "force-dynamic";
+
+type CounterHero = HeroCounter & { counter_hero_name: string; counter_hero_slug: string; counter_hero_icon: string | null };
+type RichBuild = Build & { pro_player_name?: string | null; pro_player_avatar?: string | null; items: unknown[]; arcana: unknown[]; spells: unknown[]; skill_order: unknown[] };
+
+async function fetchBuildDetails(buildId: number) {
+  const [items, arcana, spells, skillOrder] = await Promise.all([
+    query(`SELECT bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.change_type AS item_change_type FROM build_items bi JOIN items i ON i.id=bi.item_id WHERE bi.build_id=$1 ORDER BY bi.sort_order ASC`, [buildId]),
+    query(`SELECT ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type FROM build_arcana ba JOIN arcana a ON a.id=ba.arcana_id WHERE ba.build_id=$1`, [buildId]),
+    query(`SELECT s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type FROM build_spells bs JOIN spells s ON s.id=bs.spell_id WHERE bs.build_id=$1`, [buildId]),
+    query(`SELECT bso.sort_order, sk.name AS skill_name, sk.key AS skill_key, sk.image_url AS skill_image_url FROM build_skill_order bso JOIN skills sk ON sk.id=bso.skill_id WHERE bso.build_id=$1 ORDER BY bso.sort_order ASC`, [buildId]),
+  ]);
+  return { items, arcana, spells, skill_order: skillOrder };
+}
 
 async function getHeroData(slug: string) {
   const hero = await queryOne<Hero>(
     `SELECT h.*, COALESCE(v.total_views, 0) AS total_views
-     FROM heroes h
-     LEFT JOIN hero_view_counts v ON v.hero_id = h.id
-     WHERE h.slug = $1 AND h.is_published = true`,
-    [slug]
+     FROM heroes h LEFT JOIN hero_view_counts v ON v.hero_id = h.id
+     WHERE h.slug = $1 AND h.is_published = true`, [slug]
   );
   if (!hero) return null;
 
-  const [stats, skills, build] = await Promise.all([
+  const [stats, skills, buildsRaw, counters] = await Promise.all([
     queryOne<HeroStats>("SELECT * FROM hero_stats WHERE hero_id = $1", [hero.id]),
     query<Skill>("SELECT * FROM skills WHERE hero_id = $1 ORDER BY sort_order ASC", [hero.id]),
-    queryOne<Build>("SELECT * FROM builds WHERE hero_id = $1 AND is_recommended = true LIMIT 1", [hero.id]),
+    query<Build & { pro_player_name?: string; pro_player_avatar?: string }>(
+      `SELECT b.*, pp.name AS pro_player_name, pp.avatar_url AS pro_player_avatar
+       FROM builds b LEFT JOIN pro_players pp ON pp.id = b.pro_player_id
+       WHERE b.hero_id=$1 ORDER BY b.is_recommended DESC, pp.name ASC`, [hero.id]
+    ),
+    query<CounterHero>(
+      `SELECT hc.*, h.name AS counter_hero_name, h.slug AS counter_hero_slug, h.icon_url AS counter_hero_icon
+       FROM hero_counters hc JOIN heroes h ON h.id = hc.counter_hero_id
+       WHERE hc.hero_id=$1`, [hero.id]
+    ),
   ]);
 
-  let buildData = null;
-  if (build) {
-    const [items, arcana, spells, skillOrder] = await Promise.all([
-      query(
-        `SELECT bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.slug AS item_slug, i.change_type AS item_change_type
-         FROM build_items bi JOIN items i ON i.id = bi.item_id
-         WHERE bi.build_id = $1 ORDER BY bi.sort_order ASC`,
-        [build.id]
-      ),
-      query(
-        `SELECT ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.tier AS arcana_tier, a.change_type AS arcana_change_type
-         FROM build_arcana ba JOIN arcana a ON a.id = ba.arcana_id
-         WHERE ba.build_id = $1`,
-        [build.id]
-      ),
-      query(
-        `SELECT s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type
-         FROM build_spells bs JOIN spells s ON s.id = bs.spell_id
-         WHERE bs.build_id = $1`,
-        [build.id]
-      ),
-      query(
-        `SELECT bso.sort_order, sk.name AS skill_name, sk.key AS skill_key, sk.image_url AS skill_image_url
-         FROM build_skill_order bso JOIN skills sk ON sk.id = bso.skill_id
-         WHERE bso.build_id = $1 ORDER BY bso.sort_order ASC`,
-        [build.id]
-      ),
-    ]);
-    buildData = { ...build, items, arcana, spells, skill_order: skillOrder };
-  }
+  const allBuilds: RichBuild[] = await Promise.all(
+    buildsRaw.map(async (b) => ({ ...b, ...(await fetchBuildDetails(b.id)) }))
+  );
 
-  return { hero, stats, skills, build: buildData };
+  return { hero, stats, skills, allBuilds, counters };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -88,7 +81,7 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
   const data = await getHeroData(slug);
   if (!data) notFound();
 
-  const { hero, stats, skills, build } = data;
+  const { hero, stats, skills, allBuilds, counters } = data;
   const tier = stats?.tier ?? "B";
   const tierStyle = TIER_COLORS[tier] ?? TIER_COLORS.B;
 
@@ -206,8 +199,8 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
 
           {/* Build — 2/3 */}
           <div className="lg:col-span-2">
-            {build ? (
-              <HeroBuildSection build={build as Build} />
+            {allBuilds.length > 0 ? (
+              <HeroBuildSwitcher builds={allBuilds as Parameters<typeof HeroBuildSwitcher>[0]["builds"]} />
             ) : (
               <div className="rounded-xl p-10 text-center" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)", border: "1px solid #27272A" }}>
                 <Shield size={32} style={{ color: "#3F3F46", margin: "0 auto 12px" }} />
@@ -220,6 +213,57 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           {/* Sidebar — 1/3 */}
           <div className="space-y-4">
             {skills.length > 0 && <HeroSkillsSection skills={skills} />}
+
+            {/* Counters */}
+            {counters.length > 0 && (() => {
+              const weakAgainst = counters.filter(c => c.type === "weak_against");
+              const strongAgainst = counters.filter(c => c.type === "strong_against");
+              return (
+                <div className="rounded-xl overflow-hidden border border-dark-600" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)" }}>
+                  <div className="px-5 py-3 border-b border-dark-600">
+                    <p className="section-label">Counters</p>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {weakAgainst.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-2">Pick Counter</p>
+                        <div className="flex gap-3">
+                          {weakAgainst.map(c => (
+                            <a key={c.id} href={`/heroes/${c.counter_hero_slug}`} className="flex flex-col items-center gap-1 group">
+                              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-red-500/40 group-hover:border-red-400 transition-colors bg-dark-600">
+                                {c.counter_hero_icon
+                                  ? <Image src={c.counter_hero_icon} alt={c.counter_hero_name} width={48} height={48} className="w-full h-full object-cover" />
+                                  : <div className="w-full h-full flex items-center justify-center text-xs font-black text-red-400">{c.counter_hero_name[0]}</div>
+                                }
+                              </div>
+                              <span className="text-[9px] text-gray-500 text-center w-12 truncate">{c.counter_hero_name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {strongAgainst.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-2">Bom Contra</p>
+                        <div className="flex gap-3">
+                          {strongAgainst.map(c => (
+                            <a key={c.id} href={`/heroes/${c.counter_hero_slug}`} className="flex flex-col items-center gap-1 group">
+                              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-green-500/40 group-hover:border-green-400 transition-colors bg-dark-600">
+                                {c.counter_hero_icon
+                                  ? <Image src={c.counter_hero_icon} alt={c.counter_hero_name} width={48} height={48} className="w-full h-full object-cover" />
+                                  : <div className="w-full h-full flex items-center justify-center text-xs font-black text-green-400">{c.counter_hero_name[0]}</div>
+                                }
+                              </div>
+                              <span className="text-[9px] text-gray-500 text-center w-12 truncate">{c.counter_hero_name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
