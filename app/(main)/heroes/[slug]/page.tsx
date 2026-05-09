@@ -50,9 +50,9 @@ async function getHeroData(slug: string) {
     ),
   ]);
 
-  const allBuilds: RichBuild[] = await Promise.all(
+  const allBuilds = await Promise.all(
     buildsRaw.map(async (b) => ({ ...b, ...(await fetchBuildDetails(b.id)) }))
-  );
+  ) as unknown as RichBuild[];
 
   return { hero, stats, skills, allBuilds, counters };
 }
