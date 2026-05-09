@@ -41,6 +41,7 @@ export default function HeroForm({ hero }: Props) {
     origin_place: hero?.origin_place ?? "",
     faction: hero?.faction ?? "",
     lore_role: hero?.lore_role ?? "",
+    lore_credit: hero?.lore_credit ?? "",
   });
 
   function handleFileChange(
@@ -175,6 +176,16 @@ export default function HeroForm({ hero }: Props) {
           value={form.lore}
           onChange={(e) => setForm({ ...form, lore: e.target.value })}
           className="input resize-none"
+        />
+      </Field>
+
+      <Field label="Crédito da Lore (opcional)">
+        <input
+          type="text"
+          value={form.lore_credit}
+          onChange={(e) => setForm({ ...form, lore_credit: e.target.value })}
+          placeholder="Ex: Tradução por Mei Lin"
+          className="input"
         />
       </Field>
 

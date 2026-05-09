@@ -22,6 +22,7 @@ export interface Hero {
   origin_place?: string | null;
   faction?: string | null;
   lore_role?: string | null;
+  lore_credit?: string | null;
 }
 
 export interface HeroStats {

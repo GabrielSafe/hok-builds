@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass, BookOpen } from "lucide-react";
+import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass, BookOpen, Heart } from "lucide-react";
 import ViewTracker from "@/components/hero/ViewTracker";
 import HeroBuildSection from "@/components/hero/HeroBuildSection";
 import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
@@ -232,6 +232,15 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
             </div>
             <div className="p-6">
               <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-line font-sans">{hero.lore}</p>
+
+              {hero.lore_credit && (
+                <div className="mt-5 flex items-center gap-2.5 px-4 py-3 rounded-lg border border-gold-500/20 bg-gold-500/5">
+                  <Heart size={13} className="text-gold-400 shrink-0" />
+                  <p className="text-xs text-gray-400">
+                    <span className="text-gold-400 font-semibold">{hero.lore_credit}</span>
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
