@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass } from "lucide-react";
+import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass, BookOpen } from "lucide-react";
 import ViewTracker from "@/components/hero/ViewTracker";
 import HeroBuildSection from "@/components/hero/HeroBuildSection";
 import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
@@ -220,9 +220,21 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           {/* Sidebar — 1/3 */}
           <div className="space-y-4">
             {skills.length > 0 && <HeroSkillsSection skills={skills} />}
-
           </div>
         </div>
+
+        {/* ── Lore ── */}
+        {hero.lore && (
+          <div className="mt-6 rounded-xl overflow-hidden border border-dark-600" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)" }}>
+            <div className="px-5 py-3 border-b border-dark-600 flex items-center gap-2">
+              <BookOpen size={14} className="text-gold-400" />
+              <p className="section-label">Lore</p>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-line font-sans">{hero.lore}</p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
