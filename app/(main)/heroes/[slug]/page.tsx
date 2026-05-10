@@ -197,7 +197,7 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
         {/* ── Main content ── */}
         <HeroContentSection
           builds={allBuilds as Parameters<typeof HeroContentSection>[0]["builds"]}
-          counters={counters as Parameters<typeof HeroContentSection>[0]["counters"]}
+          counters={counters as unknown as Parameters<typeof HeroContentSection>[0]["counters"]}
           skills={skills.length > 0 ? <HeroSkillsSection skills={skills} /> : null}
         />
 

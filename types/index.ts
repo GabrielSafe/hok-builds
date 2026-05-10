@@ -90,6 +90,7 @@ export interface HeroCounter {
   hero_id: number;
   counter_hero_id: number;
   type: "strong_against" | "weak_against";
+  pro_player_id: number | null;
   counter_hero?: {
     id: number;
     name: string;
