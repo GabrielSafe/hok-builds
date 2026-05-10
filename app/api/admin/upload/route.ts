@@ -11,12 +11,12 @@ export const dynamic = "force-dynamic";
 const IMAGE_TYPES = ["image/webp", "image/png", "image/jpeg", "image/jpg", "image/gif", "image/avif"];
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 
-async function compressImage(buffer: Buffer): Promise<{ buffer: Buffer; contentType: string }> {
-  const compressed = await sharp(buffer)
+async function compressImage(input: Buffer): Promise<{ buffer: Buffer; contentType: string }> {
+  const compressed = await sharp(input)
     .resize({ width: 1920, height: 1080, fit: "inside", withoutEnlargement: true })
     .webp({ quality: 82 })
     .toBuffer();
-  return { buffer: compressed, contentType: "image/webp" };
+  return { buffer: Buffer.from(compressed), contentType: "image/webp" };
 }
 
 async function compressVideo(inputBuffer: Buffer, originalName: string): Promise<Buffer> {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  let buffer = Buffer.from(arrayBuffer);
+  let buffer: Buffer = Buffer.from(new Uint8Array(arrayBuffer));
   let contentType = file.type;
   let finalPath = filePath;
 
