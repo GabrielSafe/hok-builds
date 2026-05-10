@@ -88,11 +88,11 @@ export async function POST(request: NextRequest) {
   const originalSizeMB = (buffer.length / 1024 / 1024).toFixed(1);
 
   try {
-    if (isImage) {
+    if (isImage && file.type !== "image/gif") {
+      // GIF não comprime pois perde a animação
       const result = await compressImage(buffer);
       buffer = result.buffer;
       contentType = result.contentType;
-      // Troca extensão para .webp
       finalPath = filePath.replace(/\.[^.]+$/, ".webp");
     } else if (isVideo) {
       buffer = await compressVideo(buffer, file.name);

@@ -92,7 +92,7 @@ export default function AdminBannerMediaPage() {
         <label className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? "border-gold-500/50 opacity-50" : "border-dark-500 hover:border-gold-500/50"}`}>
           <input
             type="file"
-            accept="video/mp4,video/webm,image/jpeg,image/png,image/webp"
+            accept="video/mp4,video/webm,image/jpeg,image/png,image/webp,image/gif"
             onChange={handleUpload}
             disabled={uploading}
             className="hidden"
