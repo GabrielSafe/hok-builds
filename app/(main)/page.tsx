@@ -8,21 +8,20 @@ import HeroSection from "@/components/home/HeroSection";
 
 export default function HomePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div className="lg:col-span-3">
-          <Suspense fallback={<div className="h-72 rounded-xl bg-dark-700 animate-pulse" />}>
-            <HeroBanner />
-          </Suspense>
-        </div>
-        <div className="lg:col-span-1">
-          <Suspense fallback={<div className="h-72 rounded-xl bg-dark-700 animate-pulse" />}>
+    <>
+      {/* Banner full-width com popular heroes dentro */}
+      <Suspense fallback={<div className="h-[420px] bg-dark-800 animate-pulse" />}>
+        <HeroBanner>
+          <Suspense fallback={null}>
             <PopularHeroes />
           </Suspense>
-        </div>
-      </div>
+        </HeroBanner>
+      </Suspense>
 
-      <HeroSection />
-    </div>
+      {/* Grade de heróis */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <HeroSection />
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { query } from "@/lib/db";
 import type { Hero } from "@/types";
 import HeroBannerCarousel from "./HeroBannerCarousel";
+import type { ReactNode } from "react";
 
 async function getFeaturedHeroes(): Promise<Hero[]> {
   const featured = await query<Hero>(
@@ -15,7 +16,7 @@ async function getFeaturedHeroes(): Promise<Hero[]> {
   );
 }
 
-export default async function HeroBanner() {
+export default async function HeroBanner({ children }: { children?: ReactNode }) {
   const heroes = await getFeaturedHeroes();
-  return <HeroBannerCarousel heroes={heroes} />;
+  return <HeroBannerCarousel heroes={heroes}>{children}</HeroBannerCarousel>;
 }
