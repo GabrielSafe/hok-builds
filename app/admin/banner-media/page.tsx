@@ -30,20 +30,34 @@ export default function AdminBannerMediaPage() {
 
     setUploading(true);
     const isVideo = file.type.startsWith("video/");
+    const isGif = file.type === "image/gif";
     const ext = file.name.split(".").pop() ?? (isVideo ? "mp4" : "jpg");
-    const path = `banners/${Date.now()}.${ext}`;
+    const storagePath = `banners/${Date.now()}.${ext}`;
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("path", path);
+    // 1. Pede URL assinada ao servidor (sem enviar o arquivo)
+    const urlRes = await fetch("/api/admin/upload-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: storagePath }),
+    });
+    const { signedUrl, publicUrl } = await urlRes.json();
 
-    const uploadRes = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    const { url } = await uploadRes.json();
+    // 2. Upload direto para o Supabase (sem passar pelo Next.js)
+    await fetch(signedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
 
+    // 3. Registra no banco
     await fetch("/api/admin/banner-media", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, type: isVideo ? "video" : "image", title: title || file.name }),
+      body: JSON.stringify({
+        url: publicUrl,
+        type: isVideo ? "video" : "image",
+        title: title || file.name,
+      }),
     });
 
     setTitle("");
