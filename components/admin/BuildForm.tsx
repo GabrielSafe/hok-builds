@@ -2,34 +2,53 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Hero } from "@/types";
+import Image from "next/image";
+import type { Hero, ProPlayer } from "@/types";
 
 interface Props {
   heroes: Hero[];
+  proPlayers?: ProPlayer[];
   buildId?: number;
 }
 
-export default function BuildForm({ heroes, buildId }: Props) {
+export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     hero_id: heroes[0]?.id ?? "",
+    pro_player_id: "" as number | "",
     title: "Build Recomendada",
     description: "",
     patch_version: "",
     is_recommended: true,
   });
 
+  function handleProPlayerChange(value: string) {
+    const id = value === "" ? "" : parseInt(value);
+    const player = proPlayers.find(p => p.id === id);
+    setForm(prev => ({
+      ...prev,
+      pro_player_id: id,
+      is_recommended: id === "" ? prev.is_recommended : false,
+      title: player ? `Build de ${player.name}` : "Build Recomendada",
+    }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const payload = {
+      ...form,
+      pro_player_id: form.pro_player_id === "" ? null : form.pro_player_id,
+    };
+
     const res = await fetch(buildId ? `/api/admin/builds/${buildId}` : "/api/admin/builds", {
       method: buildId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -42,6 +61,8 @@ export default function BuildForm({ heroes, buildId }: Props) {
     router.push("/admin/builds");
     router.refresh();
   }
+
+  const selectedPlayer = proPlayers.find(p => p.id === form.pro_player_id);
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
@@ -64,6 +85,34 @@ export default function BuildForm({ heroes, buildId }: Props) {
           ))}
         </select>
       </div>
+
+      {/* Pro Player selector */}
+      {proPlayers.length > 0 && (
+        <div>
+          <label className="block text-xs text-gray-400 mb-1.5">Pro Player</label>
+          <select
+            value={form.pro_player_id}
+            onChange={(e) => handleProPlayerChange(e.target.value)}
+            className="input"
+          >
+            <option value="">Nenhum — Build Padrão</option>
+            {proPlayers.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          {selectedPlayer && (
+            <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-dark-600 rounded-lg border border-gold-500/20">
+              {selectedPlayer.avatar_url ? (
+                <Image src={selectedPlayer.avatar_url} alt={selectedPlayer.name} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-dark-500 flex items-center justify-center text-xs font-black text-gold-400">{selectedPlayer.name[0]}</div>
+              )}
+              <span className="text-sm text-white font-medium">{selectedPlayer.name}</span>
+              <span className="text-xs text-gray-500 ml-auto">Build de pro player</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <label className="block text-xs text-gray-400 mb-1.5">Título</label>
@@ -96,21 +145,18 @@ export default function BuildForm({ heroes, buildId }: Props) {
         />
       </div>
 
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          id="recommended"
-          checked={form.is_recommended}
-          onChange={(e) => setForm({ ...form, is_recommended: e.target.checked })}
-          className="w-4 h-4 accent-gold-500"
-        />
-        <label htmlFor="recommended" className="text-sm text-gray-300">Build Recomendada</label>
-      </div>
-
-      <p className="text-xs text-gray-500 bg-dark-700 border border-dark-600 rounded-lg p-3">
-        Após criar a build, acesse o banco de dados para adicionar itens, arcana e feitiços via tabelas <code className="text-gold-400">build_items</code>, <code className="text-gold-400">build_arcana</code> e <code className="text-gold-400">build_spells</code>.
-        Em breve teremos editor visual completo.
-      </p>
+      {!form.pro_player_id && (
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="recommended"
+            checked={form.is_recommended}
+            onChange={(e) => setForm({ ...form, is_recommended: e.target.checked })}
+            className="w-4 h-4 accent-gold-500"
+          />
+          <label htmlFor="recommended" className="text-sm text-gray-300">Build Recomendada</label>
+        </div>
+      )}
 
       <div className="flex gap-3 pt-2">
         <button
