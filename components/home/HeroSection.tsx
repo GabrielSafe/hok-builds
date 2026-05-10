@@ -2,23 +2,24 @@
 
 import { useState } from "react";
 import HeroGrid from "./HeroGrid";
-import HeroQuickView from "./HeroQuickView";
+import HeroTooltip from "./HeroTooltip";
 import type { Hero } from "@/types";
 
 export default function HeroSection() {
   const [hoveredHero, setHoveredHero] = useState<Hero | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+
+  function handleHover(hero: Hero | null, rect?: DOMRect) {
+    setHoveredHero(hero);
+    setHoveredRect(rect ?? null);
+  }
 
   return (
     <>
-      <HeroGrid onHeroHover={setHoveredHero} />
+      <HeroGrid onHeroHover={handleHover} />
 
-      {/* Quick view fixo no rodapé da tela — sempre visível */}
-      {hoveredHero && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pointer-events-none">
-          <div className="max-w-7xl mx-auto pointer-events-auto">
-            <HeroQuickView heroId={hoveredHero.id} />
-          </div>
-        </div>
+      {hoveredHero && hoveredRect && (
+        <HeroTooltip heroId={hoveredHero.id} rect={hoveredRect} />
       )}
     </>
   );

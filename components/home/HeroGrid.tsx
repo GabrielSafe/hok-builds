@@ -26,7 +26,7 @@ const SORT_OPTIONS = [
 ];
 
 interface Props {
-  onHeroHover?: (hero: Hero | null) => void;
+  onHeroHover?: (hero: Hero | null, rect?: DOMRect) => void;
 }
 
 export default function HeroGrid({ onHeroHover }: Props) {
@@ -130,13 +130,13 @@ export default function HeroGrid({ onHeroHover }: Props) {
   );
 }
 
-function HeroCard({ hero, index, onHover }: { hero: Hero; index: number; onHover?: (h: Hero | null) => void }) {
+function HeroCard({ hero, index, onHover }: { hero: Hero; index: number; onHover?: (h: Hero | null, rect?: DOMRect) => void }) {
   return (
     <Link
       href={`/heroes/${hero.slug}`}
       className="hero-card-animate group block"
       style={{ animationDelay: `${Math.min(index * 25, 400)}ms` }}
-      onMouseEnter={() => onHover?.(hero)}
+      onMouseEnter={(e) => onHover?.(hero, e.currentTarget.getBoundingClientRect())}
       onMouseLeave={() => onHover?.(null)}
     >
       <div className="relative overflow-hidden rounded-xl border-2 border-transparent bg-dark-700 transition-all duration-200 group-hover:border-gold-500 group-hover:shadow-[0_0_16px_rgba(212,160,23,0.35)]">
