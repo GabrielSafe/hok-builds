@@ -11,9 +11,13 @@ export default function HeroSection() {
   return (
     <>
       <HeroGrid onHeroHover={setHoveredHero} />
+
+      {/* Quick view fixo no rodapé da tela — sempre visível */}
       {hoveredHero && (
-        <div className="mt-2 mb-6">
-          <HeroQuickView heroId={hoveredHero.id} />
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pointer-events-none">
+          <div className="max-w-7xl mx-auto pointer-events-auto">
+            <HeroQuickView heroId={hoveredHero.id} />
+          </div>
         </div>
       )}
     </>
