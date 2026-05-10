@@ -10,15 +10,20 @@
     "db:migrate": "node scripts/migrate.js"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@supabase/supabase-js": "^2.47.10",
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/sharp": "^0.31.1",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
+    "fluent-ffmpeg": "^2.1.3",
     "jose": "^5.9.6",
     "lucide-react": "^0.468.0",
     "next": "^15.5.16",
     "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
