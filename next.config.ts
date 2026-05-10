@@ -4,6 +4,7 @@ const SUPABASE_BASE = "https://shebnxyhiguhzosxeftm.supabase.co/storage/v1/objec
 
 const nextConfig: NextConfig = {
   experimental: {
+    // @ts-ignore — next.js 15 suporta mas tipos ainda não incluem
     serverBodySizeLimit: "200mb",
   },
   images: {
