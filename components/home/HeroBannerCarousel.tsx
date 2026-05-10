@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import BannerMediaBackground from "./BannerMediaBackground";
 import type { Hero } from "@/types";
 
 interface Props {
@@ -37,23 +38,21 @@ export default function HeroBannerCarousel({ heroes }: Props) {
 
   return (
     <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-dark-700 via-dark-800 to-dark-900 border border-dark-600 min-h-[280px] md:min-h-[320px] flex items-center">
-      {/* Background splash */}
+      {/* Background — vídeo/foto do admin (se tiver) OU splash do herói */}
+      <BannerMediaBackground />
       <div
         className="absolute inset-0 transition-opacity duration-300"
         style={{ opacity: fading ? 0 : 1 }}
       >
         {hero?.splash_url && (
-          <>
-            <Image
-              src={hero.splash_url}
-              alt={hero.name}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-top opacity-50"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-dark-900/95 via-dark-900/70 to-dark-900/30" />
-          </>
+          <Image
+            src={hero.splash_url}
+            alt={hero.name}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-top opacity-20"
+          />
         )}
       </div>
 
