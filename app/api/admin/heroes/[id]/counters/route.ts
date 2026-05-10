@@ -14,7 +14,8 @@ export async function GET(
     `SELECT hc.*, h.name AS counter_hero_name, h.slug AS counter_hero_slug, h.icon_url AS counter_hero_icon
      FROM hero_counters hc
      JOIN heroes h ON h.id = hc.counter_hero_id
-     WHERE hc.hero_id = $1`,
+     WHERE hc.hero_id = $1
+     ORDER BY hc.pro_player_id NULLS FIRST`,
     [id]
   );
   return NextResponse.json(counters);
@@ -28,14 +29,14 @@ export async function POST(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const { counter_hero_id, type } = await request.json();
+  const { counter_hero_id, type, pro_player_id } = await request.json();
 
   const counter = await queryOne(
-    `INSERT INTO hero_counters (hero_id, counter_hero_id, type)
-     VALUES ($1,$2,$3)
-     ON CONFLICT (hero_id, counter_hero_id, type) DO NOTHING
+    `INSERT INTO hero_counters (hero_id, counter_hero_id, type, pro_player_id)
+     VALUES ($1,$2,$3,$4)
+     ON CONFLICT DO NOTHING
      RETURNING *`,
-    [id, counter_hero_id, type]
+    [id, counter_hero_id, type, pro_player_id ?? null]
   );
   return NextResponse.json(counter, { status: 201 });
 }

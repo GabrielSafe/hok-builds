@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { query, queryOne } from "@/lib/db";
-import type { Hero } from "@/types";
+import type { Hero, ProPlayer } from "@/types";
 import HeroForm from "@/components/admin/HeroForm";
 import SkillsEditor from "@/components/admin/SkillsEditor";
 import CountersEditor from "@/components/admin/CountersEditor";
@@ -12,10 +12,10 @@ export default async function EditHeroPage({ params }: { params: Promise<{ id: s
   const hero = await queryOne<Hero>("SELECT * FROM heroes WHERE id = $1", [id]);
   if (!hero) notFound();
 
-  const allHeroes = await query<Hero>(
-    "SELECT id, name, slug, icon_url, role FROM heroes WHERE is_published = true AND id != $1 ORDER BY name ASC",
-    [id]
-  );
+  const [allHeroes, proPlayers] = await Promise.all([
+    query<Hero>("SELECT id, name, slug, icon_url, role FROM heroes WHERE is_published = true AND id != $1 ORDER BY name ASC", [id]),
+    query<ProPlayer>("SELECT id, name, avatar_url FROM pro_players WHERE is_active = true ORDER BY name ASC"),
+  ]);
 
   return (
     <div className="p-6 max-w-3xl space-y-8">
@@ -31,7 +31,7 @@ export default async function EditHeroPage({ params }: { params: Promise<{ id: s
         <SkillsEditor heroId={hero.id} heroSlug={hero.slug} />
       </div>
 
-      <CountersEditor heroId={hero.id} allHeroes={allHeroes} />
+      <CountersEditor heroId={hero.id} allHeroes={allHeroes} proPlayers={proPlayers} />
     </div>
   );
 }

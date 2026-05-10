@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronLeft, Eye, Shield, User, Ruler, Zap, MapPin, Users, Compass, BookOpen, Heart } from "lucide-react";
+import { ChevronLeft, Eye, User, Ruler, Zap, MapPin, Users, Compass, BookOpen, Heart } from "lucide-react";
 import ViewTracker from "@/components/hero/ViewTracker";
-import HeroBuildSwitcher from "@/components/hero/HeroBuildSwitcher";
+import HeroContentSection from "@/components/hero/HeroContentSection";
 import HeroSkillsSection from "@/components/hero/HeroSkillsSection";
 import RoleBadge from "@/components/ui/RoleBadge";
 import DifficultyStars from "@/components/ui/DifficultyStars";
@@ -194,78 +194,12 @@ export default async function HeroPage({ params }: { params: Promise<{ slug: str
           )}
         </div>
 
-        {/* ── Main grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Build — 2/3 */}
-          <div className="lg:col-span-2">
-            {allBuilds.length > 0 ? (
-              <HeroBuildSwitcher builds={allBuilds as Parameters<typeof HeroBuildSwitcher>[0]["builds"]} />
-            ) : (
-              <div className="rounded-xl p-10 text-center" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)", border: "1px solid #27272A" }}>
-                <Shield size={32} style={{ color: "#3F3F46", margin: "0 auto 12px" }} />
-                <p className="font-heading font-semibold text-gray-400">Build em breve</p>
-                <p className="text-sm text-gray-600 mt-1 font-sans">A build recomendada está sendo preparada.</p>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar — 1/3 */}
-          <div className="space-y-4">
-            {skills.length > 0 && <HeroSkillsSection skills={skills} />}
-
-            {/* Counters */}
-            {counters.length > 0 && (() => {
-              const weakAgainst = counters.filter(c => c.type === "weak_against");
-              const strongAgainst = counters.filter(c => c.type === "strong_against");
-              return (
-                <div className="rounded-xl overflow-hidden border border-dark-600" style={{ background: "linear-gradient(135deg,#1E293B,#1F1F23)" }}>
-                  <div className="px-5 py-3 border-b border-dark-600">
-                    <p className="section-label">Counters</p>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    {weakAgainst.length > 0 && (
-                      <div>
-                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-2">Pick Counter</p>
-                        <div className="flex gap-3">
-                          {weakAgainst.map(c => (
-                            <a key={c.id} href={`/heroes/${c.counter_hero_slug}`} className="flex flex-col items-center gap-1 group">
-                              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-red-500/40 group-hover:border-red-400 transition-colors bg-dark-600">
-                                {c.counter_hero_icon
-                                  ? <Image src={c.counter_hero_icon} alt={c.counter_hero_name} width={48} height={48} className="w-full h-full object-cover" />
-                                  : <div className="w-full h-full flex items-center justify-center text-xs font-black text-red-400">{c.counter_hero_name[0]}</div>
-                                }
-                              </div>
-                              <span className="text-[9px] text-gray-500 text-center w-12 truncate">{c.counter_hero_name}</span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {strongAgainst.length > 0 && (
-                      <div>
-                        <p className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-2">Bom Contra</p>
-                        <div className="flex gap-3">
-                          {strongAgainst.map(c => (
-                            <a key={c.id} href={`/heroes/${c.counter_hero_slug}`} className="flex flex-col items-center gap-1 group">
-                              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-green-500/40 group-hover:border-green-400 transition-colors bg-dark-600">
-                                {c.counter_hero_icon
-                                  ? <Image src={c.counter_hero_icon} alt={c.counter_hero_name} width={48} height={48} className="w-full h-full object-cover" />
-                                  : <div className="w-full h-full flex items-center justify-center text-xs font-black text-green-400">{c.counter_hero_name[0]}</div>
-                                }
-                              </div>
-                              <span className="text-[9px] text-gray-500 text-center w-12 truncate">{c.counter_hero_name}</span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
+        {/* ── Main content ── */}
+        <HeroContentSection
+          builds={allBuilds as Parameters<typeof HeroContentSection>[0]["builds"]}
+          counters={counters as Parameters<typeof HeroContentSection>[0]["counters"]}
+          skills={skills.length > 0 ? <HeroSkillsSection skills={skills} /> : null}
+        />
 
         {/* ── Lore ── */}
         {hero.lore && (
