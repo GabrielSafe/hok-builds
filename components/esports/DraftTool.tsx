@@ -374,11 +374,7 @@ function PickSlot({ hero, team, pos, isActive }: { hero: Hero | null; team: Team
     }`}>
       {hero ? (
         <>
-          {/* Background: splash art ou ícone (sem blur) */}
-          {hero.splash_url ? (
-            <Image src={hero.splash_url} alt={hero.name} fill sizes="210px"
-              className={`object-cover ${isBlue ? "object-left-top" : "object-right-top"}`} />
-          ) : hero.icon_url ? (
+          {hero.icon_url ? (
             <Image src={hero.icon_url} alt={hero.name} fill sizes="210px"
               className="object-cover object-center scale-125" />
           ) : null}
