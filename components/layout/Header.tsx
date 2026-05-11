@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: "/tier-list", label: "Tier List" },
   { href: "/builds", label: "Builds" },
   { href: "/guides", label: "Guias" },
+  { href: "/esports", label: "E-Sports" },
 ];
 
 export default function Header() {
