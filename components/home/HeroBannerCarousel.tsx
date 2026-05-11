@@ -28,10 +28,11 @@ export default function HeroBannerCarousel({ heroes, children }: Props) {
   );
 
   useEffect(() => {
-    if (heroes.length <= 1) return;
+    // Não cicla heróis se há vídeo/mídia de fundo (evita piscar)
+    if (heroes.length <= 1 || hasMedia) return;
     const timer = setInterval(() => goTo((current + 1) % heroes.length), 5000);
     return () => clearInterval(timer);
-  }, [current, heroes.length, goTo]);
+  }, [current, heroes.length, goTo, hasMedia]);
 
   const hero = heroes[current];
 
@@ -67,11 +68,8 @@ export default function HeroBannerCarousel({ heroes, children }: Props) {
       {/* ── Conteúdo ── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-16 flex items-center gap-8" style={{ minHeight: 520 }}>
 
-        {/* Texto principal */}
-        <div
-          className="flex-1 min-w-0 transition-opacity duration-300"
-          style={{ opacity: fading ? 0 : 1 }}
-        >
+        {/* Texto principal — não pisca quando há mídia de fundo */}
+        <div className="flex-1 min-w-0">
           <p className="text-[11px] font-heading font-bold text-gold-400 uppercase tracking-[0.2em] mb-4">
             Guias & Builds
           </p>
