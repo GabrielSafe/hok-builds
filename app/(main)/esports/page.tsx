@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { Map, Users } from "lucide-react";
 import type { Metadata } from "next";
+import EsportsLogout from "@/components/esports/EsportsLogout";
 
 export const metadata: Metadata = { title: "E-Sports — HOK Builds" };
 
 export default function EsportsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
+      <div className="flex justify-end mb-4">
+        <EsportsLogout />
+      </div>
       <div className="mb-12 text-center">
         <p className="text-xs font-bold text-gold-400 uppercase tracking-[0.2em] mb-3">E-Sports</p>
         <h1 className="font-heading font-extrabold text-4xl text-white mb-4">Ferramentas para Competitivo</h1>

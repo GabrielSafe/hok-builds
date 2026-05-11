@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { RotateCcw, Undo2, Search } from "lucide-react";
+import { RotateCcw, Undo2, Search, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { Hero } from "@/types";
 import { formatRoles } from "@/lib/utils";
 
@@ -57,6 +58,13 @@ function slotIndex(step: number, team: Team, phase: Phase) {
 interface Props { heroes: Hero[]; }
 
 export default function DraftTool({ heroes }: Props) {
+  const router = useRouter();
+
+  async function logout() {
+    await fetch("/api/esports/logout", { method: "POST" });
+    router.push("/esports/login");
+    router.refresh();
+  }
   const [slots, setSlots] = useState<(Hero | null)[]>(Array(18).fill(null));
   const [step, setStep] = useState(0);
   const [search, setSearch] = useState("");
@@ -131,7 +139,7 @@ export default function DraftTool({ heroes }: Props) {
         </div>
 
         {/* Controls */}
-        <div className="flex gap-1.5 ml-2">
+        <div className="flex gap-1.5 ml-2 items-center">
           <button onClick={undo} disabled={step === 0}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
             <Undo2 size={12} /> Desfazer
@@ -139,6 +147,11 @@ export default function DraftTool({ heroes }: Props) {
           <button onClick={reset}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
             <RotateCcw size={12} /> Reiniciar
+          </button>
+          <div className="w-px h-4 bg-dark-600 mx-1" />
+          <button onClick={logout}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-600 hover:text-red-400 hover:bg-red-900/10 transition-colors">
+            <LogOut size={12} /> Sair
           </button>
         </div>
       </div>

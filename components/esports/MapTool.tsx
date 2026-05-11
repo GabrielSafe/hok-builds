@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Undo2, Redo2, Trash2, Download, MousePointer2, Pencil, Eraser, Circle, ArrowRight } from "lucide-react";
+import { Undo2, Redo2, Trash2, Download, MousePointer2, Pencil, Eraser, Circle, ArrowRight, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const MAP_SIZE = 1024;
 
@@ -53,6 +54,13 @@ function SwordsIcon({ size = 20 }: { size?: number }) {
 }
 
 export default function MapTool() {
+  const router = useRouter();
+
+  async function logout() {
+    await fetch("/api/esports/logout", { method: "POST" });
+    router.push("/esports/login");
+    router.refresh();
+  }
   const [elements, setElements] = useState<MapElement[]>([]);
   const [history, setHistory] = useState<MapElement[][]>([[]]);
   const [histIdx, setHistIdx] = useState(0);
@@ -247,6 +255,12 @@ export default function MapTool() {
         </button>
         <button onClick={saveImage} title="Salvar como imagem" className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:bg-dark-700 hover:text-green-400 transition-all">
           <Download size={16} />
+        </button>
+
+        <div className="w-8 h-px bg-dark-600 my-1" />
+
+        <button onClick={logout} title="Sair" className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:bg-red-900/20 hover:text-red-400 transition-all">
+          <LogOut size={15} />
         </button>
       </div>
 
