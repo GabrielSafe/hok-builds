@@ -2,312 +2,281 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { RotateCcw, Undo2, Search, Shield, Sword } from "lucide-react";
+import { RotateCcw, Undo2, Search } from "lucide-react";
 import type { Hero } from "@/types";
 import { formatRoles } from "@/lib/utils";
 
-// Sequência: 10 bans alternados, depois 10 picks alternados
-// 0=ban azul, 1=ban verm, ... 9=ban verm, 10=pick azul, 11=pick verm, ...
 type Team = "blue" | "red";
 type Phase = "ban" | "pick";
-type SlotType = "ban" | "pick";
 
-interface Slot { team: Team; phase: Phase; hero: Hero | null; }
-
-function buildSequence(): Array<{ team: Team; phase: Phase }> {
-  const seq: Array<{ team: Team; phase: Phase }> = [];
-  for (let i = 0; i < 10; i++) seq.push({ team: i % 2 === 0 ? "blue" : "red", phase: "ban" });
-  for (let i = 0; i < 10; i++) seq.push({ team: i % 2 === 0 ? "blue" : "red", phase: "pick" });
-  return seq;
+function buildSequence() {
+  const s: Array<{ team: Team; phase: Phase }> = [];
+  for (let i = 0; i < 10; i++) s.push({ team: i % 2 === 0 ? "blue" : "red", phase: "ban" });
+  for (let i = 0; i < 10; i++) s.push({ team: i % 2 === 0 ? "blue" : "red", phase: "pick" });
+  return s;
 }
-
-const SEQUENCE = buildSequence();
+const SEQ = buildSequence();
 
 const ROLE_LABELS: Record<string, string> = {
   Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
   Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Selva",
 };
+const ROLES = ["ALL", "Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support", "Jungle"];
+
+function slotIndex(step: number, team: Team, phase: Phase) {
+  let c = 0;
+  for (let i = 0; i < step; i++)
+    if (SEQ[i].team === team && SEQ[i].phase === phase) c++;
+  return c;
+}
 
 interface Props { heroes: Hero[]; }
 
 export default function DraftTool({ heroes }: Props) {
   const [slots, setSlots] = useState<(Hero | null)[]>(Array(20).fill(null));
-  const [step, setStep]   = useState(0); // 0-19, 20 = done
+  const [step, setStep] = useState(0);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [role, setRole] = useState("ALL");
 
   const usedIds = new Set(slots.filter(Boolean).map(h => h!.id));
+  const cur = step < 20 ? SEQ[step] : null;
+  const done = step >= 20;
 
-  const current = step < 20 ? SEQUENCE[step] : null;
-  const isDone  = step >= 20;
+  const blueBans  = Array.from({ length: 5 }, (_, i) => slots[i * 2] ?? null);
+  const redBans   = Array.from({ length: 5 }, (_, i) => slots[i * 2 + 1] ?? null);
+  const bluePicks = Array.from({ length: 5 }, (_, i) => slots[10 + i * 2] ?? null);
+  const redPicks  = Array.from({ length: 5 }, (_, i) => slots[10 + i * 2 + 1] ?? null);
 
-  const blueBans  = slots.slice(0, 10).filter((_, i) => SEQUENCE[i].team === "blue").slice(0, 5);
-  const redBans   = slots.slice(0, 10).filter((_, i) => SEQUENCE[i].team === "red").slice(0, 5);
-  const bluePicks = slots.slice(10, 20).filter((_, i) => SEQUENCE[i + 10].team === "blue").slice(0, 5);
-  const redPicks  = slots.slice(10, 20).filter((_, i) => SEQUENCE[i + 10].team === "red").slice(0, 5);
+  const filtered = useMemo(() => heroes.filter(h =>
+    (role === "ALL" || h.role.includes(role as any)) &&
+    h.name.toLowerCase().includes(search.toLowerCase())
+  ), [heroes, role, search]);
 
-  const filtered = useMemo(() => {
-    return heroes.filter(h => {
-      const matchRole = roleFilter === "ALL" || h.role.includes(roleFilter as any);
-      const matchSearch = h.name.toLowerCase().includes(search.toLowerCase());
-      return matchRole && matchSearch;
-    });
-  }, [heroes, roleFilter, search]);
-
-  function selectHero(hero: Hero) {
-    if (step >= 20) return;
-    if (usedIds.has(hero.id)) return;
-    const next = [...slots];
-    next[step] = hero;
-    setSlots(next);
-    setStep(s => s + 1);
+  function select(hero: Hero) {
+    if (done || usedIds.has(hero.id)) return;
+    const next = [...slots]; next[step] = hero;
+    setSlots(next); setStep(s => s + 1);
   }
 
   function undo() {
     if (step === 0) return;
-    const next = [...slots];
-    next[step - 1] = null;
-    setSlots(next);
-    setStep(s => s - 1);
+    const next = [...slots]; next[step - 1] = null;
+    setSlots(next); setStep(s => s - 1);
   }
 
-  function reset() {
-    setSlots(Array(20).fill(null));
-    setStep(0);
-    setSearch("");
-  }
+  function reset() { setSlots(Array(20).fill(null)); setStep(0); setSearch(""); }
 
-  const roles = ["ALL", "Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support", "Jungle"];
+  // Active slot index within team
+  const activeIdx = cur ? slotIndex(step, cur.team, cur.phase) : -1;
 
   return (
-    <div style={{ height: "calc(100vh - 56px)" }} className="flex flex-col overflow-hidden bg-dark-900">
+    <div className="flex flex-col overflow-hidden select-none"
+      style={{ height: "calc(100vh - 56px)", background: "linear-gradient(180deg,#0c1525 0%,#0B0F17 100%)" }}>
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between px-6 py-3 bg-dark-800 border-b border-dark-600 shrink-0">
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading font-bold text-white text-sm">Simulador de Draft</h1>
-          {current && (
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-              current.team === "blue" ? "bg-blue-600/20 text-blue-400 border border-blue-500/40"
-                                     : "bg-red-600/20 text-red-400 border border-red-500/40"
-            }`}>
-              {current.team === "blue" ? "Time Azul" : "Time Vermelho"} — {current.phase === "ban" ? "BAN" : "PICK"}
-            </span>
-          )}
-          {isDone && <span className="text-xs font-bold px-3 py-1 rounded-full bg-green-600/20 text-green-400 border border-green-500/40">Draft Concluído</span>}
+      {/* ── Top bar: bans + controls ── */}
+      <div className="flex items-center px-4 py-2.5 border-b border-dark-700 gap-4 shrink-0 bg-dark-900/80">
+
+        {/* Blue bans */}
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <BanSlot key={i} hero={blueBans[i]}
+              isActive={!done && cur?.team === "blue" && cur?.phase === "ban" && activeIdx === i} />
+          ))}
         </div>
-        <div className="flex gap-2">
-          <button onClick={undo} disabled={step === 0} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
-            <Undo2 size={13} /> Desfazer
+
+        {/* Center: title + turn */}
+        <div className="flex-1 text-center">
+          <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Simulador de Draft</p>
+          {!done && cur && (
+            <p className={`text-sm font-black mt-0.5 ${cur.team === "blue" ? "text-blue-400" : "text-red-400"}`}>
+              {cur.team === "blue" ? "▶ TIME AZUL" : "TIME VERMELHO ◀"} — {cur.phase === "ban" ? "BAN" : "PICK"}
+            </p>
+          )}
+          {done && <p className="text-sm font-black text-green-400 mt-0.5">✓ Draft Concluído</p>}
+        </div>
+
+        {/* Red bans */}
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <BanSlot key={i} hero={redBans[i]}
+              isActive={!done && cur?.team === "red" && cur?.phase === "ban" && activeIdx === i} />
+          ))}
+        </div>
+
+        {/* Controls */}
+        <div className="flex gap-1.5 ml-2">
+          <button onClick={undo} disabled={step === 0}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
+            <Undo2 size={12} /> Desfazer
           </button>
-          <button onClick={reset} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
-            <RotateCcw size={13} /> Reiniciar
+          <button onClick={reset}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+            <RotateCcw size={12} /> Reiniciar
           </button>
         </div>
       </div>
 
-      {/* ── Main ── */}
+      {/* ── Main: picks | grid | picks ── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── Time Azul ── */}
-        <TeamPanel
-          team="blue"
-          bans={blueBans}
-          picks={bluePicks}
-          isActive={current?.team === "blue"}
-          currentPhase={current?.phase}
-        />
+        {/* Blue picks */}
+        <div className="w-52 flex flex-col border-r border-dark-700/50 shrink-0">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <PickSlot key={i} hero={bluePicks[i]} team="blue" pos={i + 1}
+              isActive={!done && cur?.team === "blue" && cur?.phase === "pick" && activeIdx === i} />
+          ))}
+        </div>
 
-        {/* ── Centro: grid de heróis ── */}
+        {/* Center: hero grid */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Filtros */}
-          <div className="px-4 py-3 border-b border-dark-700 space-y-2 shrink-0 bg-dark-800/50">
+          {/* Filters */}
+          <div className="px-3 py-2 border-b border-dark-700 space-y-2 shrink-0 bg-dark-900/40">
             <div className="relative">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
+              <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600" />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar herói..."
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-gray-600 outline-none focus:border-gold-500/50"
-              />
+                className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-xs text-white placeholder:text-gray-700 outline-none focus:border-gold-500/40" />
             </div>
             <div className="flex gap-1 flex-wrap">
-              {roles.map(r => (
-                <button
-                  key={r}
-                  onClick={() => setRoleFilter(r)}
-                  className={`px-2.5 py-1 rounded text-[10px] font-semibold transition-all ${
-                    roleFilter === r ? "bg-gold-500 text-dark-900" : "bg-dark-700 text-gray-400 hover:text-white"
-                  }`}
-                >
+              {ROLES.map(r => (
+                <button key={r} onClick={() => setRole(r)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all ${role === r ? "bg-gold-500 text-dark-900" : "bg-dark-700 text-gray-500 hover:text-white"}`}>
                   {r === "ALL" ? "Todos" : (ROLE_LABELS[r] ?? r)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Hero grid */}
-          <div className="flex-1 overflow-y-auto p-3">
-            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+          {/* Grid */}
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))" }}>
               {filtered.map(hero => {
                 const used = usedIds.has(hero.id);
-                const isBanned = used && slots.findIndex(h => h?.id === hero.id) < 10;
+                const banned = used && slots.findIndex(h => h?.id === hero.id) < 10;
                 return (
-                  <button
-                    key={hero.id}
-                    onClick={() => selectHero(hero)}
-                    disabled={used || isDone}
-                    className={`relative flex flex-col items-center gap-1 group transition-all ${
-                      used ? "opacity-30 cursor-not-allowed" : "hover:scale-105 cursor-pointer"
-                    }`}
-                  >
-                    <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
-                      used ? "border-transparent" : "border-transparent group-hover:border-gold-500"
-                    }`}>
+                  <button key={hero.id} onClick={() => select(hero)} disabled={used || done}
+                    className={`flex flex-col items-center gap-0.5 group transition-all ${used ? "opacity-30 cursor-not-allowed" : "hover:scale-105 cursor-pointer"}`}>
+                    <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-colors ${used ? "border-transparent" : "border-transparent group-hover:border-gold-500"}`}>
                       {hero.icon_url
-                        ? <Image src={hero.icon_url} alt={hero.name} fill sizes="60px" className="object-cover" />
-                        : <div className="w-full h-full bg-dark-600 flex items-center justify-center text-xs font-black text-gold-400">{hero.name[0]}</div>
+                        ? <Image src={hero.icon_url} alt={hero.name} fill sizes="80px" className="object-cover" />
+                        : <div className="w-full h-full bg-dark-700 flex items-center justify-center text-xs font-black text-gold-400">{hero.name[0]}</div>
                       }
-                      {isBanned && (
-                        <div className="absolute inset-0 bg-red-900/60 flex items-center justify-center">
-                          <span className="text-red-400 font-black text-lg">✕</span>
+                      {banned && (
+                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                          <span className="text-red-400 font-black text-xl">✕</span>
                         </div>
                       )}
                     </div>
-                    <span className="text-[9px] text-gray-400 truncate w-full text-center leading-tight">{hero.name}</span>
+                    <span className="text-[9px] text-gray-500 truncate w-full text-center leading-none">{hero.name}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="px-4 py-2 border-t border-dark-700 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-gray-500">Bans</span>
-              <div className="flex gap-0.5">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className={`h-1.5 w-5 rounded-full ${
-                    i < step && i < 10 ? (SEQUENCE[i].team === "blue" ? "bg-blue-500" : "bg-red-500") : "bg-dark-600"
-                  }`} />
-                ))}
-              </div>
-              <span className="text-[10px] text-gray-500">Picks</span>
-              <div className="flex gap-0.5">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className={`h-1.5 w-5 rounded-full ${
-                    i + 10 < step ? (SEQUENCE[i + 10].team === "blue" ? "bg-blue-500" : "bg-red-500") : "bg-dark-600"
-                  }`} />
-                ))}
-              </div>
-              <span className="text-[10px] text-gray-500 ml-auto">{Math.min(step, 20)}/20</span>
+          {/* Progress */}
+          <div className="px-3 py-2 border-t border-dark-700 shrink-0">
+            <div className="flex gap-0.5">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${
+                  i < step
+                    ? SEQ[i].team === "blue"
+                      ? SEQ[i].phase === "ban" ? "bg-blue-700" : "bg-blue-400"
+                      : SEQ[i].phase === "ban" ? "bg-red-700" : "bg-red-400"
+                    : i === step ? "bg-gold-400 animate-pulse" : "bg-dark-600"
+                }`} />
+              ))}
             </div>
+            <p className="text-[9px] text-gray-600 text-center mt-1">{Math.min(step, 20)}/20 — {step < 10 ? "Fase de Bans" : step < 20 ? "Fase de Picks" : "Concluído"}</p>
           </div>
         </div>
 
-        {/* ── Time Vermelho ── */}
-        <TeamPanel
-          team="red"
-          bans={redBans}
-          picks={redPicks}
-          isActive={current?.team === "red"}
-          currentPhase={current?.phase}
-        />
+        {/* Red picks */}
+        <div className="w-52 flex flex-col border-l border-dark-700/50 shrink-0">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <PickSlot key={i} hero={redPicks[i]} team="red" pos={i + 1}
+              isActive={!done && cur?.team === "red" && cur?.phase === "pick" && activeIdx === i} />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function TeamPanel({ team, bans, picks, isActive, currentPhase }: {
-  team: Team;
-  bans: (Hero | null)[];
-  picks: (Hero | null)[];
-  isActive: boolean;
-  currentPhase?: Phase;
-}) {
+// ── Ban slot ────────────────────────────────────────────────
+function BanSlot({ hero, isActive }: { hero: Hero | null; isActive: boolean }) {
+  return (
+    <div className={`w-11 h-11 rounded-lg overflow-hidden border-2 transition-all ${
+      isActive ? "border-gold-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-110" :
+      hero ? "border-gray-700" : "border-dark-600 border-dashed"
+    }`}>
+      {hero ? (
+        <div className="relative w-full h-full">
+          {hero.icon_url && <Image src={hero.icon_url} alt={hero.name} fill sizes="44px" className="object-cover grayscale brightness-50" />}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-red-400 font-black text-base drop-shadow">✕</span>
+          </div>
+        </div>
+      ) : (
+        <div className={`w-full h-full ${isActive ? "bg-gold-500/10" : "bg-dark-800"}`} />
+      )}
+    </div>
+  );
+}
+
+// ── Pick slot ───────────────────────────────────────────────
+function PickSlot({ hero, team, pos, isActive }: { hero: Hero | null; team: Team; pos: number; isActive: boolean }) {
   const isBlue = team === "blue";
-  const color  = isBlue ? "blue" : "red";
-  const label  = isBlue ? "Time Azul" : "Time Vermelho";
 
   return (
-    <div className={`w-48 flex flex-col border-dark-600 shrink-0 transition-all ${
-      isBlue ? "border-r" : "border-l"
-    } ${isActive ? (isBlue ? "bg-blue-950/20" : "bg-red-950/20") : "bg-dark-800/30"}`}>
+    <div className={`flex-1 relative overflow-hidden border-b border-dark-700/40 transition-all ${
+      isActive ? isBlue
+        ? "shadow-[inset_4px_0_0_#3B82F6] bg-blue-950/30"
+        : "shadow-[inset_-4px_0_0_#EF4444] bg-red-950/30"
+      : ""
+    }`}>
+      {hero ? (
+        <>
+          {/* Background: splash art */}
+          {hero.splash_url ? (
+            <Image src={hero.splash_url} alt={hero.name} fill sizes="210px"
+              className={`object-cover object-top ${isBlue ? "object-left-top" : "object-right-top"}`} />
+          ) : hero.icon_url ? (
+            <Image src={hero.icon_url} alt={hero.name} fill sizes="210px" className="object-cover scale-150 blur-sm" />
+          ) : null}
 
-      {/* Header */}
-      <div className={`px-4 py-3 border-b border-dark-600 flex items-center gap-2 ${isActive ? "bg-dark-700/50" : ""}`}>
-        <div className={`w-2 h-2 rounded-full ${isBlue ? "bg-blue-500" : "bg-red-500"} ${isActive ? "animate-pulse" : ""}`} />
-        <span className={`text-xs font-bold ${isBlue ? "text-blue-400" : "text-red-400"}`}>{label}</span>
-      </div>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0" style={{
+            background: isBlue
+              ? "linear-gradient(to right, rgba(11,15,23,0.9) 0%, rgba(11,15,23,0.4) 60%, transparent 100%)"
+              : "linear-gradient(to left, rgba(11,15,23,0.9) 0%, rgba(11,15,23,0.4) 60%, transparent 100%)",
+          }} />
 
-      <div className="flex-1 p-3 space-y-4 overflow-y-auto">
-        {/* Bans */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Shield size={10} className="text-gray-500" />
-            <span className="text-[9px] text-gray-500 uppercase tracking-wider font-bold">Bans</span>
-            {isActive && currentPhase === "ban" && <span className="text-[9px] text-gold-400 font-bold animate-pulse">← vez</span>}
+          {/* Info */}
+          <div className={`absolute bottom-0 ${isBlue ? "left-0 pl-3" : "right-0 pr-3"} pb-2`}>
+            <p className="text-white font-heading font-bold text-sm leading-tight drop-shadow">{hero.name}</p>
+            <p className="text-[10px] text-gray-400 leading-tight">{formatRoles(hero.role)}</p>
           </div>
-          <div className="grid grid-cols-5 gap-1">
-            {Array.from({ length: 5 }).map((_, i) => {
-              const hero = bans[i] ?? null;
-              return (
-                <div key={i} className={`aspect-square rounded border ${hero ? "border-red-700/50" : "border-dark-600 border-dashed"} overflow-hidden`}>
-                  {hero ? (
-                    <div className="relative w-full h-full">
-                      {hero.icon_url && <Image src={hero.icon_url} alt={hero.name} fill sizes="36px" className="object-cover grayscale opacity-60" />}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-red-400 font-black text-sm">✕</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-dark-700/30" />
-                  )}
-                </div>
-              );
-            })}
+
+          {/* Position number */}
+          <div className={`absolute top-1.5 ${isBlue ? "left-2" : "right-2"}`}>
+            <span className={`text-[9px] font-black ${isBlue ? "text-blue-400" : "text-red-400"} opacity-60`}>{pos}</span>
           </div>
+        </>
+      ) : (
+        <div className={`w-full h-full flex flex-col items-center justify-center gap-1 ${
+          isActive
+            ? isBlue ? "bg-blue-900/20" : "bg-red-900/20"
+            : "bg-dark-800/20"
+        }`}>
+          <span className={`text-2xl font-black opacity-20 ${isBlue ? "text-blue-400" : "text-red-400"}`}>{pos}</span>
+          {isActive && (
+            <span className={`text-[9px] font-bold uppercase tracking-wider animate-pulse ${isBlue ? "text-blue-400" : "text-red-400"}`}>
+              {isBlue ? "← pick" : "pick →"}
+            </span>
+          )}
         </div>
-
-        {/* Picks */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Sword size={10} className="text-gray-500" />
-            <span className="text-[9px] text-gray-500 uppercase tracking-wider font-bold">Picks</span>
-            {isActive && currentPhase === "pick" && <span className="text-[9px] text-gold-400 font-bold animate-pulse">← vez</span>}
-          </div>
-          <div className="space-y-1.5">
-            {Array.from({ length: 5 }).map((_, i) => {
-              const hero = picks[i] ?? null;
-              return (
-                <div key={i} className={`flex items-center gap-2 p-1.5 rounded-lg border ${
-                  hero ? (isBlue ? "border-blue-700/50 bg-blue-900/10" : "border-red-700/50 bg-red-900/10") : "border-dark-600 border-dashed"
-                }`}>
-                  <div className={`w-8 h-8 rounded overflow-hidden shrink-0 border ${
-                    hero ? (isBlue ? "border-blue-600/50" : "border-red-600/50") : "border-dark-600"
-                  }`}>
-                    {hero?.icon_url
-                      ? <Image src={hero.icon_url} alt={hero.name} width={32} height={32} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full bg-dark-700/50" />
-                    }
-                  </div>
-                  <div className="min-w-0">
-                    {hero ? (
-                      <>
-                        <p className="text-[10px] font-bold text-white truncate leading-tight">{hero.name}</p>
-                        <p className="text-[9px] text-gray-500 truncate">{formatRoles(hero.role)}</p>
-                      </>
-                    ) : (
-                      <p className="text-[9px] text-gray-600">—</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

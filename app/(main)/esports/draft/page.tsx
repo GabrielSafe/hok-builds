@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Simulador de Draft — HOK Builds" }
 
 export default async function DraftPage() {
   const heroes = await query<Hero>(
-    `SELECT id, name, slug, role, icon_url FROM heroes WHERE is_published = true ORDER BY name ASC`
+    `SELECT id, name, slug, role, icon_url, splash_url FROM heroes WHERE is_published = true ORDER BY name ASC`
   );
   return <DraftTool heroes={heroes} />;
 }
