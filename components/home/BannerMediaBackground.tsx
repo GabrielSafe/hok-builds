@@ -8,6 +8,14 @@ interface BannerMedia {
   type: "video" | "image";
 }
 
+export function useBannerMedia() {
+  const [media, setMedia] = useState<BannerMedia[]>([]);
+  useEffect(() => {
+    fetch("/api/banner-media").then(r => r.json()).then((data: BannerMedia[]) => { if (data.length > 0) setMedia(data); });
+  }, []);
+  return media;
+}
+
 export default function BannerMediaBackground() {
   const [media, setMedia] = useState<BannerMedia[]>([]);
   const [current, setCurrent] = useState(0);

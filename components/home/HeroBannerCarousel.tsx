@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import BannerMediaBackground from "./BannerMediaBackground";
+import BannerMediaBackground, { useBannerMedia } from "./BannerMediaBackground";
 import type { Hero } from "@/types";
 import type { ReactNode } from "react";
 
@@ -15,6 +15,8 @@ interface Props {
 export default function HeroBannerCarousel({ heroes, children }: Props) {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
+  const bannerMedia = useBannerMedia();
+  const hasMedia = bannerMedia.length > 0;
 
   const goTo = useCallback(
     (index: number) => {
@@ -38,22 +40,25 @@ export default function HeroBannerCarousel({ heroes, children }: Props) {
 
       {/* ── Background: mídia do admin ou splash dos heróis ── */}
       <BannerMediaBackground />
-      <div
-        className="absolute inset-0 transition-opacity duration-500"
-        style={{ opacity: fading ? 0 : 1 }}
-      >
-        {hero?.splash_url && (
-          <Image
-            src={hero.splash_url}
-            alt={hero.name}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-top"
-            style={{ opacity: 0.25 }}
-          />
-        )}
-      </div>
+      {/* Splash do herói — só aparece se não houver mídia cadastrada */}
+      {!hasMedia && (
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{ opacity: fading ? 0 : 1 }}
+        >
+          {hero?.splash_url && (
+            <Image
+              src={hero.splash_url}
+              alt={hero.name}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-top"
+              style={{ opacity: 0.3 }}
+            />
+          )}
+        </div>
+      )}
 
       {/* ── Gradients para legibilidade ── */}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(11,15,23,0.92) 0%, rgba(11,15,23,0.7) 55%, rgba(11,15,23,0.5) 100%)" }} />
