@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search, X, Menu, Swords } from "lucide-react";
+import { Search, X, Menu } from "lucide-react";
 import type { Hero } from "@/types";
 import { formatRoles } from "@/lib/utils";
 
@@ -67,7 +67,6 @@ export default function Header() {
           className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-lg font-heading font-bold text-xs tracking-wide transition-all shrink-0 ml-auto border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 hover:border-gold-500 hover:shadow-[0_0_12px_rgba(212,160,23,0.3)]"
           style={{ background: "linear-gradient(135deg, rgba(212,160,23,0.08), rgba(212,160,23,0.03))" }}
         >
-          <Swords size={14} />
           E-Sports
         </Link>
 
