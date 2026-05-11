@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import { RotateCcw, Undo2, Search, LogOut, Lock, ArrowLeft } from "lucide-react";
+import { RotateCcw, Undo2, Search, LogOut, Lock, ArrowLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Hero } from "@/types";
 import { formatRoles } from "@/lib/utils";
@@ -58,18 +58,20 @@ function slotIndex(step: number, team: Team, phase: Phase) {
 interface Props {
   heroes: Hero[];
   teamNames?: { blue: string; red: string };
-  globalBanned?: number[];
+  globalBannedBlue?: number[];
+  globalBannedRed?: number[];
   currentGame?: number;
   totalGames?: number;
   score?: { blue: number; red: number };
-  onComplete?: (pickedIds: number[]) => void;
+  onComplete?: (pickedByTeam: { blue: number[]; red: number[] }) => void;
   onRestart?: () => void;
 }
 
 export default function DraftTool({
   heroes,
   teamNames,
-  globalBanned = [],
+  globalBannedBlue = [],
+  globalBannedRed = [],
   currentGame,
   totalGames,
   score,
@@ -93,23 +95,26 @@ export default function DraftTool({
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
 
-  const usedIds = new Set([
-    ...slots.filter(Boolean).map(h => h!.id),
-    ...globalBanned,
-  ]);
   const cur = step < 18 ? SEQ[step] : null;
   const done = step >= 18;
 
-  // Notify parent when all 18 picks/bans are done
-  useEffect(() => {
-    if (step === 18 && onComplete) {
-      const pickedIds = [...BLUE_PICK_IDX, ...RED_PICK_IDX]
-        .map(i => slots[i]?.id)
-        .filter((id): id is number => id !== undefined);
-      onComplete(pickedIds);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  // Per-turn global banned: only lock a team's own previous picks when it's their turn
+  const curTeamGlobalBanned = cur?.team === "blue" ? globalBannedBlue : globalBannedRed;
+
+  const usedIds = new Set([
+    ...slots.filter(Boolean).map(h => h!.id),
+    ...curTeamGlobalBanned,
+  ]);
+
+  // Set of ban-slot indices for overlay rendering
+  const BAN_SLOTS = new Set([...BLUE_BAN_IDX, ...RED_BAN_IDX]);
+
+  function handleNextGame() {
+    if (!onComplete) return;
+    const bluePickedIds = BLUE_PICK_IDX.map(i => slots[i]?.id).filter((id): id is number => id !== undefined);
+    const redPickedIds  = RED_PICK_IDX.map(i => slots[i]?.id).filter((id): id is number => id !== undefined);
+    onComplete({ blue: bluePickedIds, red: redPickedIds });
+  }
 
   const blueBans  = BLUE_BAN_IDX.map(i => slots[i] ?? null);   // 4 slots
   const redBans   = RED_BAN_IDX.map(i => slots[i] ?? null);    // 4 slots
@@ -122,7 +127,7 @@ export default function DraftTool({
   ), [heroes, role, search]);
 
   function select(hero: Hero) {
-    if (done || usedIds.has(hero.id)) return;
+    if (done || usedIds.has(hero.id) || slots.some(h => h?.id === hero.id)) return;
     const next = [...slots]; next[step] = hero;
     setSlots(next); setStep(s => s + 1);
   }
@@ -228,10 +233,12 @@ export default function DraftTool({
           <div className="flex-1 overflow-y-auto p-2">
             <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))" }}>
               {filtered.map(hero => {
-                const isGlobalBan = globalBanned.includes(hero.id);
-                const usedInGame = !isGlobalBan && slots.some(h => h?.id === hero.id);
-                const banned = usedInGame && slots.findIndex(h => h?.id === hero.id) < 10;
-                const unavailable = isGlobalBan || usedInGame;
+                const usedInGame  = slots.some(h => h?.id === hero.id);
+                const heroSlot    = slots.findIndex(h => h?.id === hero.id);
+                const isBannedInGame = usedInGame && heroSlot >= 0 && BAN_SLOTS.has(heroSlot);
+                // Global ban: only applies on this team's turn (each team only locked from their own prev picks)
+                const isGlobalBan = !usedInGame && curTeamGlobalBanned.includes(hero.id);
+                const unavailable = usedInGame || isGlobalBan;
                 return (
                   <button key={hero.id} onClick={() => select(hero)} disabled={unavailable || done}
                     className={`flex flex-col items-center gap-0.5 group transition-all ${unavailable ? "opacity-30 cursor-not-allowed" : "hover:scale-105 cursor-pointer"}`}>
@@ -245,7 +252,7 @@ export default function DraftTool({
                           <Lock size={16} className="text-orange-400" />
                         </div>
                       )}
-                      {banned && !isGlobalBan && (
+                      {isBannedInGame && (
                         <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
                           <span className="text-red-400 font-black text-xl">✕</span>
                         </div>
@@ -277,12 +284,20 @@ export default function DraftTool({
 
               {/* Controles */}
               <div className="flex items-center gap-1 shrink-0 border-l border-dark-600 pl-3">
-                <button onClick={undo} disabled={step === 0} title="Desfazer"
+                {/* Próxima partida — só aparece quando draft concluído e estamos em série */}
+                {done && isSeries && onComplete && (
+                  <button onClick={handleNextGame}
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-gold-500 hover:bg-gold-400 text-dark-900 text-[11px] font-black transition-colors">
+                    {(currentGame ?? 0) < (totalGames ?? 0) ? "Próxima Partida" : "Ver Resultado"}
+                    <ChevronRight size={11} />
+                  </button>
+                )}
+                <button onClick={undo} disabled={step === 0 || done} title="Desfazer"
                   className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
                   <Undo2 size={12} /> Desfazer
                 </button>
-                <button onClick={reset} title={isSeries ? "Reiniciar partida" : "Reiniciar"}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                <button onClick={reset} disabled={done} title={isSeries ? "Reiniciar partida" : "Reiniciar"}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
                   <RotateCcw size={12} /> {isSeries ? "Partida" : "Reiniciar"}
                 </button>
                 {isSeries && onRestart && (

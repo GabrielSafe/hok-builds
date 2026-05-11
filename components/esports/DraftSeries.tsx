@@ -9,10 +9,12 @@ import type { Hero } from "@/types";
 type Format = "md1" | "md3" | "md5" | "md7";
 type Phase = "setup" | "draft" | "between" | "complete";
 
+interface PicksByTeam { blue: number[]; red: number[]; }
+
 interface GameResult {
   game: number;
   winner: "blue" | "red" | null;
-  pickedIds: number[];
+  pickedByTeam: PicksByTeam;
 }
 
 interface Props { heroes: Hero[]; }
@@ -29,9 +31,11 @@ export default function DraftSeries({ heroes }: Props) {
   const [format, setFormat] = useState<Format>("md3");
   const [teamNames, setTeamNames] = useState({ blue: "", red: "" });
   const [currentGame, setCurrentGame] = useState(1);
-  const [globalBanned, setGlobalBanned] = useState<number[]>([]);
+  // Per-team global bans: each team is only locked from their own previous picks
+  const [globalBannedBlue, setGlobalBannedBlue] = useState<number[]>([]);
+  const [globalBannedRed, setGlobalBannedRed] = useState<number[]>([]);
   const [results, setResults] = useState<GameResult[]>([]);
-  const [lastPickedIds, setLastPickedIds] = useState<number[]>([]);
+  const [lastPickedByTeam, setLastPickedByTeam] = useState<PicksByTeam>({ blue: [], red: [] });
   const [pendingWinner, setPendingWinner] = useState<"blue" | "red" | null>(null);
 
   const info = FORMAT_INFO[format];
@@ -43,16 +47,15 @@ export default function DraftSeries({ heroes }: Props) {
   function startSeries() {
     setPhase("draft");
     setCurrentGame(1);
-    setGlobalBanned([]);
+    setGlobalBannedBlue([]);
+    setGlobalBannedRed([]);
     setResults([]);
   }
 
-  function onGameComplete(pickedIds: number[]) {
-    setLastPickedIds(pickedIds);
+  function onGameComplete(pickedByTeam: PicksByTeam) {
+    setLastPickedByTeam(pickedByTeam);
     if (format === "md1") {
-      // MD1: vai direto para complete
-      const r: GameResult = { game: 1, winner: null, pickedIds };
-      setResults([r]);
+      setResults([{ game: 1, winner: null, pickedByTeam }]);
       setPhase("complete");
     } else {
       setPhase("between");
@@ -60,26 +63,19 @@ export default function DraftSeries({ heroes }: Props) {
   }
 
   function confirmGame() {
-    const r: GameResult = {
-      game: currentGame,
-      winner: pendingWinner,
-      pickedIds: lastPickedIds,
-    };
+    const r: GameResult = { game: currentGame, winner: pendingWinner, pickedByTeam: lastPickedByTeam };
     const newResults = [...results, r];
-    const newGlobal = [...globalBanned, ...lastPickedIds];
-    const newBlueWins = newResults.filter(x => x.winner === "blue").length;
-    const newRedWins = newResults.filter(x => x.winner === "red").length;
+    // Each team only accumulates their own picks as global bans
+    const newGlobalBlue = [...globalBannedBlue, ...lastPickedByTeam.blue];
+    const newGlobalRed  = [...globalBannedRed,  ...lastPickedByTeam.red];
 
     setResults(newResults);
-    setGlobalBanned(newGlobal);
+    setGlobalBannedBlue(newGlobalBlue);
+    setGlobalBannedRed(newGlobalRed);
     setPendingWinner(null);
 
-    const seriesOver =
-      newBlueWins >= info.winsNeeded ||
-      newRedWins >= info.winsNeeded ||
-      currentGame >= info.max;
-
-    if (seriesOver) {
+    // Only end when all games are played — teams can always continue to max games
+    if (currentGame >= info.max) {
       setPhase("complete");
     } else {
       setCurrentGame(g => g + 1);
@@ -87,12 +83,20 @@ export default function DraftSeries({ heroes }: Props) {
     }
   }
 
+  function endSeriesEarly() {
+    // Record current game and go straight to result
+    setResults(prev => [...prev, { game: currentGame, winner: pendingWinner, pickedByTeam: lastPickedByTeam }]);
+    setPendingWinner(null);
+    setPhase("complete");
+  }
+
   function restart() {
     setPhase("setup");
     setCurrentGame(1);
-    setGlobalBanned([]);
+    setGlobalBannedBlue([]);
+    setGlobalBannedRed([]);
     setResults([]);
-    setLastPickedIds([]);
+    setLastPickedByTeam({ blue: [], red: [] });
     setPendingWinner(null);
   }
 
@@ -126,7 +130,7 @@ export default function DraftSeries({ heroes }: Props) {
             </div>
             {format !== "md1" && (
               <p className="text-xs text-gray-600 mt-2 text-center">
-                Heróis pickados em partidas anteriores ficam bloqueados nas próximas — Bans Globais
+                Heróis pickados por cada time ficam bloqueados para aquele mesmo time nas próximas partidas
               </p>
             )}
           </div>
@@ -164,7 +168,8 @@ export default function DraftSeries({ heroes }: Props) {
       <DraftTool
         heroes={heroes}
         teamNames={{ blue: blueTeam, red: redTeam }}
-        globalBanned={globalBanned}
+        globalBannedBlue={globalBannedBlue}
+        globalBannedRed={globalBannedRed}
         currentGame={currentGame}
         totalGames={info.max}
         score={{ blue: blueWins, red: redWins }}
@@ -176,7 +181,13 @@ export default function DraftSeries({ heroes }: Props) {
 
   // ── ENTRE PARTIDAS ───────────────────────────────────────
   if (phase === "between") {
-    const globalHeroes = heroes.filter(h => [...globalBanned, ...lastPickedIds].includes(h.id));
+    // Heroes that will be locked for each team in the next game
+    const nextBannedBlue = [...globalBannedBlue, ...lastPickedByTeam.blue];
+    const nextBannedRed  = [...globalBannedRed,  ...lastPickedByTeam.red];
+    const blueLockedHeroes = heroes.filter(h => nextBannedBlue.includes(h.id));
+    const redLockedHeroes  = heroes.filter(h => nextBannedRed.includes(h.id));
+    const isLastGame = currentGame >= info.max;
+
     return (
       <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
         <div className="w-full max-w-2xl space-y-6">
@@ -216,36 +227,68 @@ export default function DraftSeries({ heroes }: Props) {
             </div>
           </div>
 
-          {/* Global bans da próxima partida */}
-          {globalHeroes.length > 0 && (
-            <div className="bg-dark-700 border border-dark-600 rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-3">
+          {/* Heróis bloqueados por time na próxima partida */}
+          {!isLastGame && (blueLockedHeroes.length > 0 || redLockedHeroes.length > 0) && (
+            <div className="bg-dark-700 border border-dark-600 rounded-xl p-5 space-y-4">
+              <div className="flex items-center gap-2">
                 <Lock size={14} className="text-orange-400" />
-                <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">
-                  Bloqueados na próxima partida ({globalHeroes.length})
-                </p>
+                <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">Bloqueados na próxima partida</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {globalHeroes.map(h => (
-                  <div key={h.id} className="flex items-center gap-1.5 bg-dark-600 border border-dark-500 rounded-lg px-2 py-1">
-                    {h.icon_url && (
-                      <div className="relative w-6 h-6 rounded overflow-hidden shrink-0">
-                        <Image src={h.icon_url} alt={h.name} fill sizes="24px" className="object-cover grayscale" />
+              {blueLockedHeroes.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-2">{blueTeam} ({blueLockedHeroes.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {blueLockedHeroes.map(h => (
+                      <div key={h.id} className="flex items-center gap-1.5 bg-dark-600 border border-dark-500 rounded-lg px-2 py-1">
+                        {h.icon_url && (
+                          <div className="relative w-6 h-6 rounded overflow-hidden shrink-0">
+                            <Image src={h.icon_url} alt={h.name} fill sizes="24px" className="object-cover grayscale" />
+                          </div>
+                        )}
+                        <span className="text-[10px] text-gray-400">{h.name}</span>
                       </div>
-                    )}
-                    <span className="text-[10px] text-gray-400">{h.name}</span>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {redLockedHeroes.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-2">{redTeam} ({redLockedHeroes.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {redLockedHeroes.map(h => (
+                      <div key={h.id} className="flex items-center gap-1.5 bg-dark-600 border border-dark-500 rounded-lg px-2 py-1">
+                        {h.icon_url && (
+                          <div className="relative w-6 h-6 rounded overflow-hidden shrink-0">
+                            <Image src={h.icon_url} alt={h.name} fill sizes="24px" className="object-cover grayscale" />
+                          </div>
+                        )}
+                        <span className="text-[10px] text-gray-400">{h.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
+          {/* Botão principal */}
           <button onClick={confirmGame}
             className="w-full bg-gold-500 hover:bg-gold-400 text-dark-900 font-heading font-extrabold text-lg py-4 rounded-xl transition-colors flex items-center justify-center gap-2">
-            Partida {currentGame + 1} — Próximo Draft <ChevronRight size={20} />
+            {isLastGame
+              ? <><Trophy size={18} /> Ver Resultado Final</>
+              : <>Partida {currentGame + 1} — Próximo Draft <ChevronRight size={20} /></>
+            }
           </button>
 
-          <button onClick={restart} className="w-full flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-gray-400 transition-colors py-2">
+          {/* Encerrar série antecipadamente */}
+          {!isLastGame && (
+            <button onClick={endSeriesEarly}
+              className="w-full flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-gray-400 transition-colors py-2">
+              Encerrar série agora
+            </button>
+          )}
+
+          <button onClick={restart} className="w-full flex items-center justify-center gap-2 text-sm text-gray-700 hover:text-gray-500 transition-colors py-2">
             <RotateCcw size={14} /> Reiniciar série
           </button>
         </div>
@@ -254,7 +297,9 @@ export default function DraftSeries({ heroes }: Props) {
   }
 
   // ── SÉRIE CONCLUÍDA ──────────────────────────────────────
-  const seriesWinner = blueWins > redWins ? blueTeam : redWins > blueWins ? redTeam : null;
+  const totalBlueWins = results.filter(r => r.winner === "blue").length;
+  const totalRedWins  = results.filter(r => r.winner === "red").length;
+  const seriesWinner = totalBlueWins > totalRedWins ? blueTeam : totalRedWins > totalBlueWins ? redTeam : null;
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
       <div className="w-full max-w-lg text-center space-y-6">
@@ -272,12 +317,12 @@ export default function DraftSeries({ heroes }: Props) {
         </div>
         <div className="flex items-center justify-center gap-8 bg-dark-700 border border-dark-600 rounded-xl py-6">
           <div>
-            <p className="text-5xl font-black text-blue-400">{blueWins}</p>
+            <p className="text-5xl font-black text-blue-400">{totalBlueWins}</p>
             <p className="text-sm text-gray-400 mt-1">{blueTeam}</p>
           </div>
           <p className="text-3xl text-gray-600 font-bold">×</p>
           <div>
-            <p className="text-5xl font-black text-red-400">{redWins}</p>
+            <p className="text-5xl font-black text-red-400">{totalRedWins}</p>
             <p className="text-sm text-gray-400 mt-1">{redTeam}</p>
           </div>
         </div>
