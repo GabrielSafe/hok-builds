@@ -36,7 +36,7 @@ export default function HeroBannerCarousel({ heroes, children }: Props) {
   const hero = heroes[current];
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ minHeight: 420 }}>
+    <section className="relative w-full overflow-hidden" style={{ minHeight: "calc(100vh - 56px)" }}>
 
       {/* ── Background: mídia do admin ou splash dos heróis ── */}
       <BannerMediaBackground />
@@ -65,7 +65,7 @@ export default function HeroBannerCarousel({ heroes, children }: Props) {
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(11,15,23,0.98) 100%)" }} />
 
       {/* ── Conteúdo ── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-14 flex items-center gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 flex items-center gap-8 h-full" style={{ minHeight: "calc(100vh - 56px)", paddingTop: "5rem", paddingBottom: "5rem" }}>
 
         {/* Texto principal */}
         <div
