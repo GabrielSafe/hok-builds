@@ -138,22 +138,6 @@ export default function DraftTool({ heroes }: Props) {
           ))}
         </div>
 
-        {/* Controls */}
-        <div className="flex gap-1.5 ml-2 items-center">
-          <button onClick={undo} disabled={step === 0}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
-            <Undo2 size={12} /> Desfazer
-          </button>
-          <button onClick={reset}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
-            <RotateCcw size={12} /> Reiniciar
-          </button>
-          <div className="w-px h-4 bg-dark-600 mx-1" />
-          <button onClick={logout}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] text-gray-600 hover:text-red-400 hover:bg-red-900/10 transition-colors">
-            <LogOut size={12} /> Sair
-          </button>
-        </div>
       </div>
 
       {/* ── Main: picks | grid | picks ── */}
@@ -216,20 +200,38 @@ export default function DraftTool({ heroes }: Props) {
 
           {/* Progress */}
           <div className="px-3 py-2 border-t border-dark-700 shrink-0">
-            <div className="flex gap-0.5">
-              {Array.from({ length: 18 }).map((_, i) => (
-                <div key={i} className={`flex-1 h-1.5 rounded-full transition-colors ${
-                  i < step
-                    ? SEQ[i].team === "blue"
-                      ? SEQ[i].phase === "ban" ? "bg-blue-800" : "bg-blue-400"
-                      : SEQ[i].phase === "ban" ? "bg-red-800" : "bg-red-400"
-                    : i === step ? "bg-gold-400 animate-pulse" : "bg-dark-600"
-                }`} />
-              ))}
+            <div className="flex items-center gap-3">
+              {/* Barra de progresso */}
+              <div className="flex gap-0.5 flex-1">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <div key={i} className={`flex-1 h-1.5 rounded-full transition-colors ${
+                    i < step
+                      ? SEQ[i].team === "blue"
+                        ? SEQ[i].phase === "ban" ? "bg-blue-800" : "bg-blue-400"
+                        : SEQ[i].phase === "ban" ? "bg-red-800" : "bg-red-400"
+                      : i === step ? "bg-gold-400 animate-pulse" : "bg-dark-600"
+                  }`} />
+                ))}
+              </div>
+              <p className="text-[9px] text-gray-500 shrink-0">{Math.min(step, 18)}/18</p>
+
+              {/* Controles */}
+              <div className="flex items-center gap-1 shrink-0 border-l border-dark-600 pl-3">
+                <button onClick={undo} disabled={step === 0} title="Desfazer"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
+                  <Undo2 size={12} /> Desfazer
+                </button>
+                <button onClick={reset} title="Reiniciar"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                  <RotateCcw size={12} /> Reiniciar
+                </button>
+                <div className="w-px h-3 bg-dark-600" />
+                <button onClick={logout} title="Sair"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-600 hover:text-red-400 hover:bg-red-900/10 transition-colors">
+                  <LogOut size={12} /> Sair
+                </button>
+              </div>
             </div>
-            <p className="text-[9px] text-gray-600 text-center mt-1">
-              {Math.min(step, 18)}/18 — {cur?.label ?? "Concluído"}
-            </p>
           </div>
         </div>
 
