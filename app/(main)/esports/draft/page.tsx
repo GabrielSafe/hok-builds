@@ -3,6 +3,8 @@ import { query } from "@/lib/db";
 import DraftTool from "@/components/esports/DraftTool";
 import type { Hero } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Simulador de Draft — HOK Builds" };
 
 export default async function DraftPage() {
