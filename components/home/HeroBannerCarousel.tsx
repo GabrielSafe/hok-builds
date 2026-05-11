@@ -43,6 +43,12 @@ const TEXT_SLIDES = [
     titleJSX: <>A Referência de Builds<br />para <span className="text-gold-400">Honor of Kings no Brasil</span></>,
     subtitle: "Tier list atualizada, builds por campeão e guias completos para dominar cada partida.",
   },
+  {
+    label: "Lore & História",
+    titlePlain: "Conheça a História Completa de Cada Herói",
+    titleJSX: <>Conheça a <span className="text-gold-400">História Completa</span><br />de Cada Herói</>,
+    subtitle: "Lores detalhadas, origens, facções e muito mais — mergulhe no universo rico de Honor of Kings.",
+  },
 ];
 
 export default function HeroBannerCarousel({ heroes, children }: Props) {
