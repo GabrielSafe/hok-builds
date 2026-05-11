@@ -22,9 +22,9 @@ export default async function PopularHeroes() {
 
   return (
     <div className="bg-dark-700 border border-dark-600 rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-dark-600">
-        <h3 className="text-sm font-bold text-gold-400 uppercase tracking-wider">Heróis Mais Populares</h3>
-        <Link href="/heroes" className="text-xs text-gray-500 hover:text-gold-400 transition-colors">
+      <div className="flex items-center justify-between px-4 py-4 border-b border-dark-600 gap-4">
+        <h3 className="text-sm font-bold text-gold-400 uppercase tracking-wider leading-tight">Heróis Mais Populares</h3>
+        <Link href="/heroes" className="text-xs text-gray-500 hover:text-gold-400 transition-colors shrink-0">
           Ver Todos
         </Link>
       </div>
