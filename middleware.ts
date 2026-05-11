@@ -49,6 +49,15 @@ export async function middleware(request: NextRequest) {
     if (!payload) return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
+  // ── E-Sports auth ───────────────────────────────────────
+  const esportsProtected = ["/esports/map", "/esports/draft"];
+  if (esportsProtected.some(p => pathname.startsWith(p))) {
+    const token = request.cookies.get("esports_token")?.value;
+    if (!token) return NextResponse.redirect(new URL("/esports/login", request.url));
+    const payload = await verifyToken(token);
+    if (!payload) return NextResponse.redirect(new URL("/esports/login", request.url));
+  }
+
   // ── Request logging ─────────────────────────────────────
   if (!SKIP.test(pathname)) {
     // DEBUG temporário — remove depois

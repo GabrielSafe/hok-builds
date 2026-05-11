@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getSession } from "@/lib/auth";
-import { LayoutDashboard, Users, Sword, BarChart2, LogOut, Package, Sparkles, Zap, Image as ImageIcon, TrendingUp, Trophy, Film } from "lucide-react";
+import { LayoutDashboard, Users, Sword, BarChart2, LogOut, Package, Sparkles, Zap, Image as ImageIcon, TrendingUp, Trophy, Film, KeyRound } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <NavItem href="/admin/banner" icon={<ImageIcon size={16} />} label="Banner" />
           <NavItem href="/admin/indicators" icon={<TrendingUp size={16} />} label="Indicadores" />
           <NavItem href="/admin/pro-players" icon={<Trophy size={16} />} label="Pro Players" />
+          <NavItem href="/admin/coaches" icon={<KeyRound size={16} />} label="Coaches" />
           <div className="pt-2 pb-1">
             <p className="text-[10px] text-gray-600 uppercase tracking-wider px-3">Cadastros</p>
           </div>
