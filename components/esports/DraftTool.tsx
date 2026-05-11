@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { RotateCcw, Undo2, Search, LogOut } from "lucide-react";
+import { RotateCcw, Undo2, Search, LogOut, Lock, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Hero } from "@/types";
 import { formatRoles } from "@/lib/utils";
@@ -55,9 +55,27 @@ function slotIndex(step: number, team: Team, phase: Phase) {
   return c;
 }
 
-interface Props { heroes: Hero[]; }
+interface Props {
+  heroes: Hero[];
+  teamNames?: { blue: string; red: string };
+  globalBanned?: number[];
+  currentGame?: number;
+  totalGames?: number;
+  score?: { blue: number; red: number };
+  onComplete?: (pickedIds: number[]) => void;
+  onRestart?: () => void;
+}
 
-export default function DraftTool({ heroes }: Props) {
+export default function DraftTool({
+  heroes,
+  teamNames,
+  globalBanned = [],
+  currentGame,
+  totalGames,
+  score,
+  onComplete,
+  onRestart,
+}: Props) {
   const router = useRouter();
 
   async function logout() {
@@ -65,14 +83,33 @@ export default function DraftTool({ heroes }: Props) {
     router.push("/esports/login");
     router.refresh();
   }
+
+  const blueTeamName = teamNames?.blue || "Time Azul";
+  const redTeamName  = teamNames?.red  || "Time Vermelho";
+  const isSeries = currentGame !== undefined;
+
   const [slots, setSlots] = useState<(Hero | null)[]>(Array(18).fill(null));
   const [step, setStep] = useState(0);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
 
-  const usedIds = new Set(slots.filter(Boolean).map(h => h!.id));
+  const usedIds = new Set([
+    ...slots.filter(Boolean).map(h => h!.id),
+    ...globalBanned,
+  ]);
   const cur = step < 18 ? SEQ[step] : null;
   const done = step >= 18;
+
+  // Notify parent when all 18 picks/bans are done
+  useEffect(() => {
+    if (step === 18 && onComplete) {
+      const pickedIds = [...BLUE_PICK_IDX, ...RED_PICK_IDX]
+        .map(i => slots[i]?.id)
+        .filter((id): id is number => id !== undefined);
+      onComplete(pickedIds);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const blueBans  = BLUE_BAN_IDX.map(i => slots[i] ?? null);   // 4 slots
   const redBans   = RED_BAN_IDX.map(i => slots[i] ?? null);    // 4 slots
@@ -118,12 +155,28 @@ export default function DraftTool({ heroes }: Props) {
 
         {/* Center: title + turn */}
         <div className="flex-1 text-center">
-          <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Simulador de Draft</p>
+          {isSeries ? (
+            <div className="flex items-center justify-center gap-3 mb-0.5">
+              <span className="text-3xl font-black text-blue-400 tabular-nums">{score?.blue ?? 0}</span>
+              <div className="text-center">
+                <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold leading-none">
+                  Partida {currentGame}{totalGames ? ` de ${totalGames}` : ""}
+                </p>
+                <p className="text-[10px] text-gray-600 leading-none">×</p>
+              </div>
+              <span className="text-3xl font-black text-red-400 tabular-nums">{score?.red ?? 0}</span>
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Simulador de Draft</p>
+          )}
           {!done && cur && (
             <>
               <p className="text-[9px] text-gray-600 uppercase tracking-widest">{phaseLabel}</p>
               <p className={`text-sm font-black ${cur.team === "blue" ? "text-blue-400" : "text-red-400"}`}>
-                {cur.team === "blue" ? "▶ TIME AZUL" : "TIME VERMELHO ◀"} — {cur.phase === "ban" ? "BAN" : "PICK"}
+                {cur.team === "blue"
+                  ? `▶ ${blueTeamName.toUpperCase()}`
+                  : `${redTeamName.toUpperCase()} ◀`
+                } — {cur.phase === "ban" ? "BAN" : "PICK"}
               </p>
             </>
           )}
@@ -175,17 +228,24 @@ export default function DraftTool({ heroes }: Props) {
           <div className="flex-1 overflow-y-auto p-2">
             <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))" }}>
               {filtered.map(hero => {
-                const used = usedIds.has(hero.id);
-                const banned = used && slots.findIndex(h => h?.id === hero.id) < 10;
+                const isGlobalBan = globalBanned.includes(hero.id);
+                const usedInGame = !isGlobalBan && slots.some(h => h?.id === hero.id);
+                const banned = usedInGame && slots.findIndex(h => h?.id === hero.id) < 10;
+                const unavailable = isGlobalBan || usedInGame;
                 return (
-                  <button key={hero.id} onClick={() => select(hero)} disabled={used || done}
-                    className={`flex flex-col items-center gap-0.5 group transition-all ${used ? "opacity-30 cursor-not-allowed" : "hover:scale-105 cursor-pointer"}`}>
-                    <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-colors ${used ? "border-transparent" : "border-transparent group-hover:border-gold-500"}`}>
+                  <button key={hero.id} onClick={() => select(hero)} disabled={unavailable || done}
+                    className={`flex flex-col items-center gap-0.5 group transition-all ${unavailable ? "opacity-30 cursor-not-allowed" : "hover:scale-105 cursor-pointer"}`}>
+                    <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-colors ${unavailable ? "border-transparent" : "border-transparent group-hover:border-gold-500"}`}>
                       {hero.icon_url
                         ? <Image src={hero.icon_url} alt={hero.name} fill sizes="80px" className="object-cover" />
                         : <div className="w-full h-full bg-dark-700 flex items-center justify-center text-xs font-black text-gold-400">{hero.name[0]}</div>
                       }
-                      {banned && (
+                      {isGlobalBan && (
+                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                          <Lock size={16} className="text-orange-400" />
+                        </div>
+                      )}
+                      {banned && !isGlobalBan && (
                         <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
                           <span className="text-red-400 font-black text-xl">✕</span>
                         </div>
@@ -221,10 +281,16 @@ export default function DraftTool({ heroes }: Props) {
                   className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 disabled:opacity-30 transition-colors">
                   <Undo2 size={12} /> Desfazer
                 </button>
-                <button onClick={reset} title="Reiniciar"
+                <button onClick={reset} title={isSeries ? "Reiniciar partida" : "Reiniciar"}
                   className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
-                  <RotateCcw size={12} /> Reiniciar
+                  <RotateCcw size={12} /> {isSeries ? "Partida" : "Reiniciar"}
                 </button>
+                {isSeries && onRestart && (
+                  <button onClick={onRestart} title="Reiniciar série"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-500 hover:text-orange-400 hover:bg-orange-900/10 transition-colors">
+                    <ArrowLeft size={12} /> Série
+                  </button>
+                )}
                 <div className="w-px h-3 bg-dark-600" />
                 <button onClick={logout} title="Sair"
                   className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-gray-600 hover:text-red-400 hover:bg-red-900/10 transition-colors">

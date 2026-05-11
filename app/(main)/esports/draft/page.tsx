@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { query } from "@/lib/db";
-import DraftTool from "@/components/esports/DraftTool";
+import DraftSeries from "@/components/esports/DraftSeries";
 import type { Hero } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -11,5 +11,5 @@ export default async function DraftPage() {
   const heroes = await query<Hero>(
     `SELECT id, name, slug, role, icon_url, splash_url FROM heroes WHERE is_published = true ORDER BY name ASC`
   );
-  return <DraftTool heroes={heroes} />;
+  return <DraftSeries heroes={heroes} />;
 }
