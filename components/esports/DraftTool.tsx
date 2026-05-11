@@ -9,13 +9,37 @@ import { formatRoles } from "@/lib/utils";
 type Team = "blue" | "red";
 type Phase = "ban" | "pick";
 
-function buildSequence() {
-  const s: Array<{ team: Team; phase: Phase }> = [];
-  for (let i = 0; i < 10; i++) s.push({ team: i % 2 === 0 ? "blue" : "red", phase: "ban" });
-  for (let i = 0; i < 10; i++) s.push({ team: i % 2 === 0 ? "blue" : "red", phase: "pick" });
-  return s;
-}
-const SEQ = buildSequence();
+// Sequência oficial HOK competitivo — 18 passos
+const SEQ: Array<{ team: Team; phase: Phase; label: string }> = [
+  // Fase 1 — Bans (4)
+  { team: "blue", phase: "ban",  label: "Fase 1 — Bans" },  // 0
+  { team: "red",  phase: "ban",  label: "Fase 1 — Bans" },  // 1
+  { team: "blue", phase: "ban",  label: "Fase 1 — Bans" },  // 2
+  { team: "red",  phase: "ban",  label: "Fase 1 — Bans" },  // 3
+  // Fase 1 — Picks (6)
+  { team: "blue", phase: "pick", label: "Fase 1 — Picks" }, // 4  (Blue 1st pick)
+  { team: "red",  phase: "pick", label: "Fase 1 — Picks" }, // 5
+  { team: "red",  phase: "pick", label: "Fase 1 — Picks" }, // 6  (Red 2 seguidos)
+  { team: "blue", phase: "pick", label: "Fase 1 — Picks" }, // 7
+  { team: "blue", phase: "pick", label: "Fase 1 — Picks" }, // 8  (Blue 2 seguidos)
+  { team: "red",  phase: "pick", label: "Fase 1 — Picks" }, // 9  (Red 3º pick)
+  // Fase 2 — Bans (4)
+  { team: "red",  phase: "ban",  label: "Fase 2 — Bans" },  // 10 (Red bana primeiro)
+  { team: "blue", phase: "ban",  label: "Fase 2 — Bans" },  // 11
+  { team: "red",  phase: "ban",  label: "Fase 2 — Bans" },  // 12
+  { team: "blue", phase: "ban",  label: "Fase 2 — Bans" },  // 13
+  // Fase 2 — Picks (4)
+  { team: "red",  phase: "pick", label: "Fase 2 — Picks" }, // 14 (Red 4º pick)
+  { team: "blue", phase: "pick", label: "Fase 2 — Picks" }, // 15
+  { team: "blue", phase: "pick", label: "Fase 2 — Picks" }, // 16 (Blue last picks)
+  { team: "red",  phase: "pick", label: "Fase 2 — Picks" }, // 17 (Red last pick)
+];
+
+// Índices por time
+const BLUE_BAN_IDX  = SEQ.reduce<number[]>((a, s, i) => s.team === "blue" && s.phase === "ban"  ? [...a, i] : a, []);
+const RED_BAN_IDX   = SEQ.reduce<number[]>((a, s, i) => s.team === "red"  && s.phase === "ban"  ? [...a, i] : a, []);
+const BLUE_PICK_IDX = SEQ.reduce<number[]>((a, s, i) => s.team === "blue" && s.phase === "pick" ? [...a, i] : a, []);
+const RED_PICK_IDX  = SEQ.reduce<number[]>((a, s, i) => s.team === "red"  && s.phase === "pick" ? [...a, i] : a, []);
 
 const ROLE_LABELS: Record<string, string> = {
   Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
@@ -33,19 +57,19 @@ function slotIndex(step: number, team: Team, phase: Phase) {
 interface Props { heroes: Hero[]; }
 
 export default function DraftTool({ heroes }: Props) {
-  const [slots, setSlots] = useState<(Hero | null)[]>(Array(20).fill(null));
+  const [slots, setSlots] = useState<(Hero | null)[]>(Array(18).fill(null));
   const [step, setStep] = useState(0);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
 
   const usedIds = new Set(slots.filter(Boolean).map(h => h!.id));
-  const cur = step < 20 ? SEQ[step] : null;
-  const done = step >= 20;
+  const cur = step < 18 ? SEQ[step] : null;
+  const done = step >= 18;
 
-  const blueBans  = Array.from({ length: 5 }, (_, i) => slots[i * 2] ?? null);
-  const redBans   = Array.from({ length: 5 }, (_, i) => slots[i * 2 + 1] ?? null);
-  const bluePicks = Array.from({ length: 5 }, (_, i) => slots[10 + i * 2] ?? null);
-  const redPicks  = Array.from({ length: 5 }, (_, i) => slots[10 + i * 2 + 1] ?? null);
+  const blueBans  = BLUE_BAN_IDX.map(i => slots[i] ?? null);   // 4 slots
+  const redBans   = RED_BAN_IDX.map(i => slots[i] ?? null);    // 4 slots
+  const bluePicks = BLUE_PICK_IDX.map(i => slots[i] ?? null);  // 5 slots
+  const redPicks  = RED_PICK_IDX.map(i => slots[i] ?? null);   // 5 slots
 
   const filtered = useMemo(() => heroes.filter(h =>
     (role === "ALL" || h.role.includes(role as any)) &&
@@ -64,10 +88,10 @@ export default function DraftTool({ heroes }: Props) {
     setSlots(next); setStep(s => s - 1);
   }
 
-  function reset() { setSlots(Array(20).fill(null)); setStep(0); setSearch(""); }
+  function reset() { setSlots(Array(18).fill(null)); setStep(0); setSearch(""); }
 
-  // Active slot index within team
   const activeIdx = cur ? slotIndex(step, cur.team, cur.phase) : -1;
+  const phaseLabel = cur?.label ?? (done ? "Draft Concluído" : "");
 
   return (
     <div className="flex flex-col overflow-hidden select-none"
@@ -78,7 +102,7 @@ export default function DraftTool({ heroes }: Props) {
 
         {/* Blue bans */}
         <div className="flex items-center gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <BanSlot key={i} hero={blueBans[i]} team="blue"
               isActive={!done && cur?.team === "blue" && cur?.phase === "ban" && activeIdx === i} />
           ))}
@@ -88,16 +112,19 @@ export default function DraftTool({ heroes }: Props) {
         <div className="flex-1 text-center">
           <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Simulador de Draft</p>
           {!done && cur && (
-            <p className={`text-sm font-black mt-0.5 ${cur.team === "blue" ? "text-blue-400" : "text-red-400"}`}>
-              {cur.team === "blue" ? "▶ TIME AZUL" : "TIME VERMELHO ◀"} — {cur.phase === "ban" ? "BAN" : "PICK"}
-            </p>
+            <>
+              <p className="text-[9px] text-gray-600 uppercase tracking-widest">{phaseLabel}</p>
+              <p className={`text-sm font-black ${cur.team === "blue" ? "text-blue-400" : "text-red-400"}`}>
+                {cur.team === "blue" ? "▶ TIME AZUL" : "TIME VERMELHO ◀"} — {cur.phase === "ban" ? "BAN" : "PICK"}
+              </p>
+            </>
           )}
-          {done && <p className="text-sm font-black text-green-400 mt-0.5">✓ Draft Concluído</p>}
+          {done && <p className="text-sm font-black text-green-400">✓ Draft Concluído</p>}
         </div>
 
         {/* Red bans */}
         <div className="flex items-center gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <BanSlot key={i} hero={redBans[i]} team="red"
               isActive={!done && cur?.team === "red" && cur?.phase === "ban" && activeIdx === i} />
           ))}
@@ -177,17 +204,19 @@ export default function DraftTool({ heroes }: Props) {
           {/* Progress */}
           <div className="px-3 py-2 border-t border-dark-700 shrink-0">
             <div className="flex gap-0.5">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${
+              {Array.from({ length: 18 }).map((_, i) => (
+                <div key={i} className={`flex-1 h-1.5 rounded-full transition-colors ${
                   i < step
                     ? SEQ[i].team === "blue"
-                      ? SEQ[i].phase === "ban" ? "bg-blue-700" : "bg-blue-400"
-                      : SEQ[i].phase === "ban" ? "bg-red-700" : "bg-red-400"
+                      ? SEQ[i].phase === "ban" ? "bg-blue-800" : "bg-blue-400"
+                      : SEQ[i].phase === "ban" ? "bg-red-800" : "bg-red-400"
                     : i === step ? "bg-gold-400 animate-pulse" : "bg-dark-600"
                 }`} />
               ))}
             </div>
-            <p className="text-[9px] text-gray-600 text-center mt-1">{Math.min(step, 20)}/20 — {step < 10 ? "Fase de Bans" : step < 20 ? "Fase de Picks" : "Concluído"}</p>
+            <p className="text-[9px] text-gray-600 text-center mt-1">
+              {Math.min(step, 18)}/18 — {cur?.label ?? "Concluído"}
+            </p>
           </div>
         </div>
 
