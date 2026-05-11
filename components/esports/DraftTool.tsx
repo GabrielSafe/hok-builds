@@ -77,9 +77,9 @@ export default function DraftTool({ heroes }: Props) {
       <div className="flex items-center px-4 py-2.5 border-b border-dark-700 gap-4 shrink-0 bg-dark-900/80">
 
         {/* Blue bans */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <BanSlot key={i} hero={blueBans[i]}
+            <BanSlot key={i} hero={blueBans[i]} team="blue"
               isActive={!done && cur?.team === "blue" && cur?.phase === "ban" && activeIdx === i} />
           ))}
         </div>
@@ -96,9 +96,9 @@ export default function DraftTool({ heroes }: Props) {
         </div>
 
         {/* Red bans */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <BanSlot key={i} hero={redBans[i]}
+            <BanSlot key={i} hero={redBans[i]} team="red"
               isActive={!done && cur?.team === "red" && cur?.phase === "ban" && activeIdx === i} />
           ))}
         </div>
@@ -204,21 +204,33 @@ export default function DraftTool({ heroes }: Props) {
 }
 
 // ── Ban slot ────────────────────────────────────────────────
-function BanSlot({ hero, isActive }: { hero: Hero | null; isActive: boolean }) {
+function BanSlot({ hero, team, isActive }: { hero: Hero | null; team: Team; isActive: boolean }) {
+  const isBlue = team === "blue";
   return (
-    <div className={`w-11 h-11 rounded-lg overflow-hidden border-2 transition-all ${
-      isActive ? "border-gold-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-110" :
-      hero ? "border-gray-700" : "border-dark-600 border-dashed"
+    <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${
+      isActive
+        ? "border-gold-400 shadow-[0_0_16px_rgba(250,204,21,0.7)] scale-110 w-16 h-16"
+        : hero
+          ? isBlue ? "border-blue-800 w-14 h-14" : "border-red-800 w-14 h-14"
+          : isBlue ? "border-blue-900/50 border-dashed w-14 h-14" : "border-red-900/50 border-dashed w-14 h-14"
     }`}>
       {hero ? (
-        <div className="relative w-full h-full">
-          {hero.icon_url && <Image src={hero.icon_url} alt={hero.name} fill sizes="44px" className="object-cover grayscale brightness-50" />}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-red-400 font-black text-base drop-shadow">✕</span>
+        <>
+          {hero.icon_url && (
+            <Image src={hero.icon_url} alt={hero.name} fill sizes="64px"
+              className="object-cover grayscale brightness-40" />
+          )}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/50">
+            <span className="text-red-400 font-black text-xl drop-shadow-lg">✕</span>
+            <span className="text-[8px] text-gray-400 font-semibold truncate px-1 text-center leading-tight">{hero.name}</span>
           </div>
-        </div>
+        </>
       ) : (
-        <div className={`w-full h-full ${isActive ? "bg-gold-500/10" : "bg-dark-800"}`} />
+        <div className={`w-full h-full flex items-center justify-center ${
+          isActive ? "bg-gold-500/10" : isBlue ? "bg-blue-950/30" : "bg-red-950/30"
+        }`}>
+          {isActive && <span className="text-gold-400 text-lg animate-pulse">?</span>}
+        </div>
       )}
     </div>
   );
@@ -237,12 +249,13 @@ function PickSlot({ hero, team, pos, isActive }: { hero: Hero | null; team: Team
     }`}>
       {hero ? (
         <>
-          {/* Background: splash art */}
+          {/* Background: splash art ou ícone (sem blur) */}
           {hero.splash_url ? (
             <Image src={hero.splash_url} alt={hero.name} fill sizes="210px"
-              className={`object-cover object-top ${isBlue ? "object-left-top" : "object-right-top"}`} />
+              className={`object-cover ${isBlue ? "object-left-top" : "object-right-top"}`} />
           ) : hero.icon_url ? (
-            <Image src={hero.icon_url} alt={hero.name} fill sizes="210px" className="object-cover scale-150 blur-sm" />
+            <Image src={hero.icon_url} alt={hero.name} fill sizes="210px"
+              className="object-cover object-center scale-125" />
           ) : null}
 
           {/* Gradient overlay */}
