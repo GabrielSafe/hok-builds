@@ -29,18 +29,18 @@ export default async function PopularHeroes() {
         </Link>
       </div>
 
-      <div className="divide-y divide-dark-600">
+      <div className="divide-y divide-dark-600/60">
         {heroes.map((hero, index) => (
           <Link
             key={hero.id}
             href={`/heroes/${hero.slug}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-dark-600 transition-colors group"
+            className="flex items-center gap-3 px-4 py-4 hover:bg-dark-600/50 transition-colors group"
           >
-            <span className="text-lg font-black text-dark-500 w-5 text-center">{index + 1}</span>
+            <span className="text-sm font-black text-gray-600 w-5 text-center shrink-0">{index + 1}</span>
 
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-dark-500 group-hover:border-gold-500/50 transition-colors shrink-0">
+            <div className="relative w-11 h-11 rounded-lg overflow-hidden border border-dark-500 group-hover:border-gold-500/50 transition-colors shrink-0">
               {hero.icon_url ? (
-                <Image src={hero.icon_url} alt={hero.name} fill sizes="40px" className="object-cover" />
+                <Image src={hero.icon_url} alt={hero.name} fill sizes="44px" className="object-cover" />
               ) : (
                 <div className="w-full h-full bg-dark-500 flex items-center justify-center text-xs font-bold text-gold-400">
                   {hero.name[0]}
@@ -49,15 +49,15 @@ export default async function PopularHeroes() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate group-hover:text-gold-400 transition-colors">
+              <p className="text-sm font-semibold text-white truncate group-hover:text-gold-400 transition-colors">
                 {hero.name}
               </p>
-              <p className="text-xs text-gray-500">{formatRoles(hero.role)}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatRoles(hero.role)}</p>
             </div>
 
-            <div className="flex items-center gap-1 text-xs text-gray-500 shrink-0">
-              <Eye size={12} className="text-gold-400/60" />
-              {formatNumber(hero.total_views ?? 0)}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Eye size={13} className="text-gold-400" />
+              <span className="text-sm font-bold text-gray-300">{formatNumber(hero.total_views ?? 0)}</span>
             </div>
           </Link>
         ))}
