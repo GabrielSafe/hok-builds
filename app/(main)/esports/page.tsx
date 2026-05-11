@@ -23,14 +23,14 @@ export default function EsportsPage() {
           <div className="mt-6 text-xs font-bold text-gold-400 uppercase tracking-wider">Acessar →</div>
         </Link>
 
-        <div className="relative overflow-hidden rounded-2xl border border-dark-600 bg-dark-700 p-8 opacity-60">
-          <div className="w-14 h-14 rounded-xl bg-dark-600 border border-dark-500 flex items-center justify-center mb-5">
-            <Users size={28} className="text-gray-500" />
+        <Link href="/esports/draft" className="group relative overflow-hidden rounded-2xl border border-dark-600 bg-dark-700 p-8 hover:border-gold-500/50 transition-all">
+          <div className="w-14 h-14 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center mb-5 group-hover:bg-gold-500/20 transition-colors">
+            <Users size={28} className="text-gold-400" />
           </div>
           <h2 className="font-heading font-bold text-xl text-white mb-2">Simulador de Draft</h2>
-          <p className="text-gray-500 text-sm leading-relaxed">Simule a fase de bans e picks do draft competitivo com todos os heróis.</p>
-          <div className="mt-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Em breve</div>
-        </div>
+          <p className="text-gray-500 text-sm leading-relaxed">Simule a fase de bans e picks. 5 bans por time, picks alternados com todos os heróis.</p>
+          <div className="mt-6 text-xs font-bold text-gold-400 uppercase tracking-wider">Acessar →</div>
+        </Link>
       </div>
     </div>
   );
