@@ -103,22 +103,22 @@ const ROWS_DEF = [
 ];
 
 // Mapa de tier: "row-hexIndex" → 1=azul, 2=verde, 3=vermelho, ausente=ghost
-// Considerando offset das linhas ímpares (start=0.5) vs pares (start=0.0 ou 1.0)
+// Azul forma coluna-C à esquerda, vermelho é espelho à direita (simétrico no eixo col 3.5)
 // Linha 0 (6, start=1.0): B B _ _ R R
 // Linha 1 (7, start=0.5): B B _ _ _ R R
-// Linha 2 (8, start=0.0): B _ G G _ _ R _
+// Linha 2 (8, start=0.0): B _ G G _ _ _ R
 // Linha 3 (7, start=0.5): B _ G G G _ R
-// Linha 4 (8, start=0.0): B _ G G G _ R _
+// Linha 4 (8, start=0.0): B _ G G G _ _ R
 // Linha 5 (7, start=0.5): B _ G G _ _ R
 // Linha 6 (6, start=1.0): B B _ _ R R
 const TIER_MAP: Record<string, number> = {
-  "0-0":1,"0-1":1,"0-4":3,"0-5":3,
-  "1-0":1,"1-1":1,"1-5":3,"1-6":3,
-  "2-0":1,"2-2":2,"2-3":2,"2-6":3,
-  "3-0":1,"3-2":2,"3-3":2,"3-4":2,"3-6":3,
-  "4-0":1,"4-2":2,"4-3":2,"4-4":2,"4-6":3,
-  "5-0":1,"5-2":2,"5-3":2,"5-6":3,
-  "6-0":1,"6-1":1,"6-4":3,"6-5":3,
+  "0-0":1,"0-1":1,                           "0-4":3,"0-5":3,
+  "1-0":1,"1-1":1,                        "1-5":3,"1-6":3,
+  "2-0":1,      "2-2":2,"2-3":2,                      "2-7":3,
+  "3-0":1,      "3-2":2,"3-3":2,"3-4":2,          "3-6":3,
+  "4-0":1,      "4-2":2,"4-3":2,"4-4":2,               "4-7":3,
+  "5-0":1,      "5-2":2,"5-3":2,                  "5-6":3,
+  "6-0":1,"6-1":1,                           "6-4":3,"6-5":3,
 };
 
 const R = 28;        // circumradius
