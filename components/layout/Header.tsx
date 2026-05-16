@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/heroes", label: "Heróis" },
   { href: "/tier-list", label: "Tier List" },
   { href: "/builds", label: "Builds" },
+  { href: "/streamers", label: "Parceiros" },
   { href: "/guides", label: "Guias" },
 ];
 
