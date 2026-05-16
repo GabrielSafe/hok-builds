@@ -37,8 +37,8 @@ export default function StreamersShowcase({ creators }: Props) {
   }
 
   return (
-    <div className="w-full bg-[#f5f4f3]">
-      <div className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f5f4f3] px-5 py-10">
+    <div className="w-full">
+      <div className="flex h-full w-full items-center justify-center overflow-hidden px-5 py-10">
         <div className="relative w-full max-w-6xl">
           <div className="flex w-full items-center justify-center gap-1">
             {creators.map((creator, idx) => {
