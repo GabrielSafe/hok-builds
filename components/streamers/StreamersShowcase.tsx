@@ -38,8 +38,8 @@ export default function StreamersShowcase({ creators }: Props) {
   }
 
   return (
-    <div className="w-full">
-      <div className="relative grid grid-cols-1 items-center justify-center p-2 transition-all duration-300 ease-in-out lg:flex w-full">
+    <div className="w-full h-screen">
+      <div className="relative grid min-h-screen grid-cols-1 items-center justify-center p-2 transition-all duration-300 ease-in-out lg:flex w-full">
         <div className="w-full h-full overflow-hidden rounded-3xl">
           <div className="flex h-full w-full items-center justify-center overflow-hidden">
             <div className="relative w-full max-w-6xl px-5">
@@ -68,7 +68,6 @@ export default function StreamersShowcase({ creators }: Props) {
                         </div>
                       )}
 
-                      {/* Info overlay no card expandido */}
                       {isExpanded && (
                         <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-gold-400 mb-1">
