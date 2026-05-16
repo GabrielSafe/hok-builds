@@ -89,16 +89,18 @@ const TIER_CONFIG = {
 
 /* ─── Arcana SVG hex grid — layout unificado igual ao jogo ─── */
 
+// 12 colunas, 0=ghost, 1=azul, 2=verde, 3=vermelho — 10 por tier
 const GRID: number[][] = [
-  [1, 1, 0, 2, 2, 0, 0, 3, 3],
-  [1, 1, 0, 2, 2, 2, 0, 3, 3],
-  [1, 1, 0, 2, 2, 2, 0, 3, 3],
-  [1, 1, 0, 2, 2, 0, 0, 3, 3],
-  [1, 0, 0, 0, 0, 0, 0, 3, 0],
-  [1, 0, 0, 0, 0, 0, 0, 3, 0],
+  [1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 3, 3],
+  [1, 1, 0, 0, 2, 2, 2, 0, 0, 3, 3, 0],
+  [1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 3, 3],
+  [1, 1, 0, 0, 2, 2, 2, 0, 0, 3, 3, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
-const R = 23;        // circumradius
+const R = 28;        // circumradius — hexagonos maiores
 const S3 = Math.sqrt(3);
 const COL_STEP = R * S3;   // horizontal center-to-center
 const ROW_STEP = R * 1.5;  // vertical center-to-center
