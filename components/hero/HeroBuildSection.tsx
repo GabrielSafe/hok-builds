@@ -87,68 +87,91 @@ const TIER_CONFIG = {
   3: { label: "Vermelho", bg: "#2A0D0D", border: "#EF4444", glow: "rgba(239,68,68,.6)",   empty: "#1f0909" },
 } as const;
 
-const HEX = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
-const HEX_SIZE = 52;
-const HEX_GAP = 5;
-const HEX_OFFSET = (HEX_SIZE + HEX_GAP) / 2;
+const HEX_CLIP = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+const OUTER = 60; // tamanho do hexagono externo (borda)
+const INNER = 54; // tamanho do hexagono interno (fundo)
+const GAP   = 4;
+const OFFSET = (OUTER + GAP) / 2;
+
+function HexSlot({ slot, cfg }: {
+  slot: { name: string; imageUrl: string | null } | null;
+  cfg: typeof TIER_CONFIG[1];
+}) {
+  const filled = !!slot;
+  return (
+    <div
+      title={slot?.name}
+      style={{ width: OUTER, height: OUTER, flexShrink: 0, cursor: filled ? "pointer" : "default", transition: "filter .2s" }}
+      onMouseEnter={e => { if (filled) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.25) drop-shadow(0 0 10px ${cfg.glow})`; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
+    >
+      {/* Camada externa — cor da borda */}
+      <div style={{
+        width: OUTER, height: OUTER,
+        clipPath: HEX_CLIP,
+        background: filled ? cfg.border : `${cfg.border}44`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        {/* Camada interna — fundo */}
+        <div style={{
+          width: INNER, height: INNER,
+          clipPath: HEX_CLIP,
+          background: filled ? cfg.bg : cfg.empty,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          overflow: "hidden",
+        }}>
+          {slot?.imageUrl && (
+            <Image
+              src={slot.imageUrl}
+              alt={slot.name}
+              width={INNER}
+              height={INNER}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          )}
+          {slot && !slot.imageUrl && (
+            <span style={{ fontSize: 12, fontWeight: 900, color: cfg.border }}>{slot.name[0]}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
   return (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div style={{ display: "flex", gap: 40, flexWrap: "wrap", justifyContent: "center" }}>
       {([1, 2, 3] as const).map(tier => {
         const cfg = TIER_CONFIG[tier];
         const tierArcana = arcana.filter(a => a.arcana_tier === tier);
         if (tierArcana.length === 0) return null;
 
-        // Expand into 10 individual slots
-        const slots: Array<{ name: string; imageUrl: string | null }> = [];
+        const slots: Array<{ name: string; imageUrl: string | null } | null> = [];
         tierArcana.forEach(a => {
           for (let i = 0; i < a.quantity; i++)
             slots.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
         });
-        while (slots.length < 10) slots.push(null as unknown as { name: string; imageUrl: string | null });
+        while (slots.length < 10) slots.push(null);
 
         const row1 = slots.slice(0, 5);
         const row2 = slots.slice(5, 10);
 
-        const renderSlot = (slot: { name: string; imageUrl: string | null } | null, i: number) => (
-          <div
-            key={i}
-            title={slot?.name}
-            style={{
-              width: HEX_SIZE, height: HEX_SIZE, flexShrink: 0,
-              clipPath: HEX,
-              background: slot ? cfg.bg : cfg.empty,
-              boxShadow: slot ? `inset 0 0 0 2px ${cfg.border}` : `inset 0 0 0 2px ${cfg.border}44`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              overflow: "hidden", cursor: slot ? "pointer" : "default",
-              transition: "filter .2s",
-            }}
-            onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.3) drop-shadow(0 0 8px ${cfg.glow})`; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
-          >
-            {slot?.imageUrl && (
-              <Image src={slot.imageUrl} alt={slot.name} width={HEX_SIZE} height={HEX_SIZE}
-                style={{ width: "100%", height: "100%", objectFit: "cover", clipPath: HEX }} />
-            )}
-            {slot && !slot.imageUrl && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: cfg.border }}>{slot.name[0]}</span>
-            )}
-          </div>
-        );
-
         return (
-          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: cfg.border, fontFamily: "var(--font-montserrat)" }}>
+          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
+              textTransform: "uppercase", color: cfg.border,
+              fontFamily: "var(--font-montserrat)", alignSelf: "center",
+            }}>
               {cfg.label}
             </span>
-            {/* Row 1 — 5 hexagonos */}
-            <div style={{ display: "flex", gap: HEX_GAP }}>
-              {row1.map((s, i) => renderSlot(s, i))}
+            {/* Linha 1 */}
+            <div style={{ display: "flex", gap: GAP }}>
+              {row1.map((s, i) => <HexSlot key={i} slot={s} cfg={cfg} />)}
             </div>
-            {/* Row 2 — 5 hexagonos com offset (honeycomb) */}
-            <div style={{ display: "flex", gap: HEX_GAP, marginLeft: HEX_OFFSET, marginTop: -(HEX_SIZE * 0.28) }}>
-              {row2.map((s, i) => renderSlot(s, i + 5))}
+            {/* Linha 2 — deslocada (honeycomb) */}
+            <div style={{ display: "flex", gap: GAP, marginLeft: OFFSET, marginTop: -(OUTER * 0.26) }}>
+              {row2.map((s, i) => <HexSlot key={i + 5} slot={s} cfg={cfg} />)}
             </div>
           </div>
         );
