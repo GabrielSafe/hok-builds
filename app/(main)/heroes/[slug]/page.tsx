@@ -15,7 +15,7 @@ import type { Hero, HeroStats, Skill, Build, HeroCounter } from "@/types";
 export const dynamic = "force-dynamic";
 
 type CounterHero = HeroCounter & { counter_hero_name: string; counter_hero_slug: string; counter_hero_icon: string | null };
-type RichBuild = Build & { pro_player_name?: string | null; pro_player_avatar?: string | null; items: unknown[]; arcana: unknown[]; spells: unknown[]; skill_order: unknown[] };
+type RichBuild = Build & { creator_name?: string | null; creator_avatar?: string | null; creator_type?: string | null; items: unknown[]; arcana: unknown[]; spells: unknown[]; skill_order: unknown[] };
 
 async function fetchBuildDetails(buildId: number) {
   const [items, arcana, spells, skillOrder] = await Promise.all([
@@ -38,10 +38,10 @@ async function getHeroData(slug: string) {
   const [stats, skills, buildsRaw, counters] = await Promise.all([
     queryOne<HeroStats>("SELECT * FROM hero_stats WHERE hero_id = $1", [hero.id]),
     query<Skill>("SELECT * FROM skills WHERE hero_id = $1 ORDER BY sort_order ASC", [hero.id]),
-    query<Build & { pro_player_name?: string; pro_player_avatar?: string }>(
-      `SELECT b.*, pp.name AS pro_player_name, pp.avatar_url AS pro_player_avatar
-       FROM builds b LEFT JOIN pro_players pp ON pp.id = b.pro_player_id
-       WHERE b.hero_id=$1 ORDER BY b.is_recommended DESC, pp.name ASC`, [hero.id]
+    query<Build & { creator_name?: string; creator_avatar?: string; creator_type?: string }>(
+      `SELECT b.*, c.name AS creator_name, c.avatar_url AS creator_avatar, c.creator_type
+       FROM builds b LEFT JOIN creators c ON c.id = b.creator_id
+       WHERE b.hero_id=$1 ORDER BY b.is_recommended DESC, c.name ASC`, [hero.id]
     ),
     query<CounterHero>(
       `SELECT hc.*, h.name AS counter_hero_name, h.slug AS counter_hero_slug, h.icon_url AS counter_hero_icon
