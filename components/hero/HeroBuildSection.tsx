@@ -87,50 +87,64 @@ const TIER_CONFIG = {
   3: { label: "Vermelho", bg: "#2A0D0D", border: "#EF4444", glow: "rgba(239,68,68,.6)",   empty: "#1f0909" },
 } as const;
 
-const HEX_CLIP = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
-const OUTER = 60; // tamanho do hexagono externo (borda)
-const INNER = 54; // tamanho do hexagono interno (fundo)
-const GAP   = 4;
-const OFFSET = (OUTER + GAP) / 2;
+/* ─── Arcana hex grid — layout unificado igual ao jogo ─── */
 
-function HexSlot({ slot, cfg }: {
+const HC = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+const SZ  = 52;   // outer size
+const SZI = 46;   // inner size
+const GAP = 3;    // gap between hexagons
+const PITCH = SZ + GAP;
+
+// Grade que define a posição de cada tier (0 = ghost, 1 = azul, 2 = verde, 3 = vermelho)
+// 6 linhas × 9 colunas — conta exatamente 10 por tier
+const GRID: number[][] = [
+  [1, 1, 0, 2, 2, 0, 0, 3, 3],
+  [1, 1, 0, 2, 2, 2, 0, 3, 3],
+  [1, 1, 0, 2, 2, 2, 0, 3, 3],
+  [1, 1, 0, 2, 2, 0, 0, 3, 3],
+  [1, 0, 0, 0, 0, 0, 0, 3, 0],
+  [1, 0, 0, 0, 0, 0, 0, 3, 0],
+];
+
+function Hex({
+  tier, filled, slot,
+}: {
+  tier: 0 | 1 | 2 | 3;
+  filled: boolean;
   slot: { name: string; imageUrl: string | null } | null;
-  cfg: typeof TIER_CONFIG[1];
 }) {
-  const filled = !!slot;
+  const cfg = tier > 0 ? TIER_CONFIG[tier as 1|2|3] : null;
+
+  // Ghost hexagon (sem tier)
+  if (!cfg) {
+    return (
+      <div style={{ width: SZ, height: SZ, flexShrink: 0 }}>
+        <div style={{ width: SZ, height: SZ, clipPath: HC, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: SZI, height: SZI, clipPath: HC, background: "rgba(0,0,0,0.2)" }} />
+        </div>
+      </div>
+    );
+  }
+
+  const borderColor = filled ? cfg.border : `${cfg.border}55`;
+  const bgColor     = filled ? cfg.bg     : cfg.empty;
+
   return (
     <div
       title={slot?.name}
-      style={{ width: OUTER, height: OUTER, flexShrink: 0, cursor: filled ? "pointer" : "default", transition: "filter .2s" }}
-      onMouseEnter={e => { if (filled) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.25) drop-shadow(0 0 10px ${cfg.glow})`; }}
+      style={{ width: SZ, height: SZ, flexShrink: 0, cursor: slot ? "pointer" : "default", transition: "filter .2s" }}
+      onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.3) drop-shadow(0 0 8px ${cfg.glow})`; }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
     >
-      {/* Camada externa — cor da borda */}
-      <div style={{
-        width: OUTER, height: OUTER,
-        clipPath: HEX_CLIP,
-        background: filled ? cfg.border : `${cfg.border}44`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        {/* Camada interna — fundo */}
-        <div style={{
-          width: INNER, height: INNER,
-          clipPath: HEX_CLIP,
-          background: filled ? cfg.bg : cfg.empty,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          overflow: "hidden",
-        }}>
+      {/* Camada externa = borda */}
+      <div style={{ width: SZ, height: SZ, clipPath: HC, background: borderColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* Camada interna = fundo */}
+        <div style={{ width: SZI, height: SZI, clipPath: HC, background: bgColor, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
           {slot?.imageUrl && (
-            <Image
-              src={slot.imageUrl}
-              alt={slot.name}
-              width={INNER}
-              height={INNER}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            <Image src={slot.imageUrl} alt={slot.name} width={SZI} height={SZI} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           )}
           {slot && !slot.imageUrl && (
-            <span style={{ fontSize: 12, fontWeight: 900, color: cfg.border }}>{slot.name[0]}</span>
+            <span style={{ fontSize: 11, fontWeight: 900, color: cfg.border }}>{slot.name[0]}</span>
           )}
         </div>
       </div>
@@ -139,40 +153,42 @@ function HexSlot({ slot, cfg }: {
 }
 
 function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
+  // Expande arcanas por tier em slots individuais
+  const tierSlots: Record<number, Array<{ name: string; imageUrl: string | null }>> = { 1: [], 2: [], 3: [] };
+  arcana.forEach(a => {
+    for (let i = 0; i < a.quantity; i++)
+      tierSlots[a.arcana_tier]?.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
+  });
+  const tierIdx: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
+
+  const hasTier = (t: number) => arcana.some(a => a.arcana_tier === t);
+  if (!hasTier(1) && !hasTier(2) && !hasTier(3)) return null;
+
   return (
-    <div style={{ display: "flex", gap: 40, flexWrap: "wrap", justifyContent: "center" }}>
-      {([1, 2, 3] as const).map(tier => {
-        const cfg = TIER_CONFIG[tier];
-        const tierArcana = arcana.filter(a => a.arcana_tier === tier);
-        if (tierArcana.length === 0) return null;
-
-        const slots: Array<{ name: string; imageUrl: string | null } | null> = [];
-        tierArcana.forEach(a => {
-          for (let i = 0; i < a.quantity; i++)
-            slots.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
-        });
-        while (slots.length < 10) slots.push(null);
-
-        const row1 = slots.slice(0, 5);
-        const row2 = slots.slice(5, 10);
-
+    <div style={{ display: "flex", flexDirection: "column", gap: 0, alignItems: "flex-start", overflowX: "auto" }}>
+      {GRID.map((row, rowIdx) => {
+        const isOdd = rowIdx % 2 === 1;
         return (
-          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
-            <span style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
-              textTransform: "uppercase", color: cfg.border,
-              fontFamily: "var(--font-montserrat)", alignSelf: "center",
-            }}>
-              {cfg.label}
-            </span>
-            {/* Linha 1 */}
-            <div style={{ display: "flex", gap: GAP }}>
-              {row1.map((s, i) => <HexSlot key={i} slot={s} cfg={cfg} />)}
-            </div>
-            {/* Linha 2 — deslocada (honeycomb) */}
-            <div style={{ display: "flex", gap: GAP, marginLeft: OFFSET, marginTop: -(OUTER * 0.26) }}>
-              {row2.map((s, i) => <HexSlot key={i + 5} slot={s} cfg={cfg} />)}
-            </div>
+          <div
+            key={rowIdx}
+            style={{
+              display: "flex",
+              gap: GAP,
+              marginLeft: isOdd ? PITCH / 2 : 0,
+              marginTop: rowIdx === 0 ? 0 : -(SZ * 0.25),
+            }}
+          >
+            {row.map((cell, colIdx) => {
+              const tier = cell as 0 | 1 | 2 | 3;
+              let slot: { name: string; imageUrl: string | null } | null = null;
+              let filled = false;
+              if (tier > 0) {
+                const s = tierSlots[tier][tierIdx[tier]];
+                if (s) { slot = s; filled = true; }
+                tierIdx[tier]++;
+              }
+              return <Hex key={colIdx} tier={tier} filled={filled} slot={slot} />;
+            })}
           </div>
         );
       })}
