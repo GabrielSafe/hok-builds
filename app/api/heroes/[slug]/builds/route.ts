@@ -12,13 +12,22 @@ export async function GET(
   );
   if (!hero) return NextResponse.json([], { status: 200 });
 
-  const builds = await query<{ id: number; title: string; patch_version: string | null; is_recommended: boolean; pro_player_id: number | null; pro_player_name: string | null; pro_player_avatar: string | null }>(
-    `SELECT b.id, b.title, b.patch_version, b.is_recommended, b.pro_player_id,
-            pp.name AS pro_player_name, pp.avatar_url AS pro_player_avatar
+  const builds = await query<{
+    id: number;
+    title: string;
+    patch_version: string | null;
+    is_recommended: boolean;
+    creator_id: number | null;
+    creator_name: string | null;
+    creator_avatar: string | null;
+    creator_type: string | null;
+  }>(
+    `SELECT b.id, b.title, b.patch_version, b.is_recommended, b.creator_id,
+            c.name AS creator_name, c.avatar_url AS creator_avatar, c.creator_type
      FROM builds b
-     LEFT JOIN pro_players pp ON pp.id = b.pro_player_id
+     LEFT JOIN creators c ON c.id = b.creator_id
      WHERE b.hero_id = $1
-     ORDER BY b.is_recommended DESC, pp.name ASC`,
+     ORDER BY b.is_recommended DESC, c.name ASC`,
     [hero.id]
   );
 

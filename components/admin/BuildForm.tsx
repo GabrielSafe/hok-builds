@@ -3,35 +3,36 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { Hero, ProPlayer } from "@/types";
+import type { Hero, Creator } from "@/types";
+import { CREATOR_TYPE_LABELS, LANE_LABELS } from "@/components/admin/CreatorForm";
 
 interface Props {
   heroes: Hero[];
-  proPlayers?: ProPlayer[];
+  creators?: Creator[];
   buildId?: number;
 }
 
-export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
+export default function BuildForm({ heroes, creators = [], buildId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     hero_id: heroes[0]?.id ?? "",
-    pro_player_id: "" as number | "",
+    creator_id: "" as number | "",
     title: "Build Recomendada",
     description: "",
     patch_version: "",
     is_recommended: true,
   });
 
-  function handleProPlayerChange(value: string) {
+  function handleCreatorChange(value: string) {
     const id = value === "" ? "" : parseInt(value);
-    const player = proPlayers.find(p => p.id === id);
+    const creator = creators.find(c => c.id === id);
     setForm(prev => ({
       ...prev,
-      pro_player_id: id,
+      creator_id: id,
       is_recommended: id === "" ? prev.is_recommended : false,
-      title: player ? `Build de ${player.name}` : "Build Recomendada",
+      title: creator ? `Build de ${creator.name}` : "Build Recomendada",
     }));
   }
 
@@ -42,7 +43,7 @@ export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
 
     const payload = {
       ...form,
-      pro_player_id: form.pro_player_id === "" ? null : form.pro_player_id,
+      creator_id: form.creator_id === "" ? null : form.creator_id,
     };
 
     const res = await fetch(buildId ? `/api/admin/builds/${buildId}` : "/api/admin/builds", {
@@ -62,7 +63,7 @@ export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
     router.refresh();
   }
 
-  const selectedPlayer = proPlayers.find(p => p.id === form.pro_player_id);
+  const selectedCreator = creators.find(c => c.id === form.creator_id);
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
@@ -86,29 +87,39 @@ export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
         </select>
       </div>
 
-      {/* Pro Player selector */}
-      {proPlayers.length > 0 && (
+      {creators.length > 0 && (
         <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Pro Player</label>
+          <label className="block text-xs text-gray-400 mb-1.5">Criador</label>
           <select
-            value={form.pro_player_id}
-            onChange={(e) => handleProPlayerChange(e.target.value)}
+            value={form.creator_id}
+            onChange={(e) => handleCreatorChange(e.target.value)}
             className="input"
           >
             <option value="">Nenhum — Build Padrão</option>
-            {proPlayers.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
+            {["pro_player", "streamer", "coach"].map(type => {
+              const group = creators.filter(c => c.creator_type === type);
+              if (group.length === 0) return null;
+              return (
+                <optgroup key={type} label={CREATOR_TYPE_LABELS[type as keyof typeof CREATOR_TYPE_LABELS]}>
+                  {group.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
-          {selectedPlayer && (
+          {selectedCreator && (
             <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-dark-600 rounded-lg border border-gold-500/20">
-              {selectedPlayer.avatar_url ? (
-                <Image src={selectedPlayer.avatar_url} alt={selectedPlayer.name} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
+              {selectedCreator.avatar_url ? (
+                <Image src={selectedCreator.avatar_url} alt={selectedCreator.name} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-dark-500 flex items-center justify-center text-xs font-black text-gold-400">{selectedPlayer.name[0]}</div>
+                <div className="w-7 h-7 rounded-full bg-dark-500 flex items-center justify-center text-xs font-black text-gold-400">{selectedCreator.name[0]}</div>
               )}
-              <span className="text-sm text-white font-medium">{selectedPlayer.name}</span>
-              <span className="text-xs text-gray-500 ml-auto">Build de pro player</span>
+              <span className="text-sm text-white font-medium">{selectedCreator.name}</span>
+              <span className="text-xs text-gray-500 ml-auto">
+                {CREATOR_TYPE_LABELS[selectedCreator.creator_type]}
+                {selectedCreator.main_role ? ` · ${LANE_LABELS[selectedCreator.main_role] ?? selectedCreator.main_role}` : ""}
+              </span>
             </div>
           )}
         </div>
@@ -145,7 +156,7 @@ export default function BuildForm({ heroes, proPlayers = [], buildId }: Props) {
         />
       </div>
 
-      {!form.pro_player_id && (
+      {!form.creator_id && (
         <div className="flex items-center gap-3">
           <input
             type="checkbox"

@@ -34,7 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <NavItem href="/admin/stats" icon={<BarChart2 size={16} />} label="Estatísticas" />
           <NavItem href="/admin/banner" icon={<ImageIcon size={16} />} label="Banner" />
           <NavItem href="/admin/indicators" icon={<TrendingUp size={16} />} label="Indicadores" />
-          <NavItem href="/admin/pro-players" icon={<Trophy size={16} />} label="Pro Players" />
+          <NavItem href="/admin/creators" icon={<Trophy size={16} />} label="Criadores" />
           <NavItem href="/admin/coaches" icon={<KeyRound size={16} />} label="Coaches" />
           <div className="pt-2 pb-1">
             <p className="text-[10px] text-gray-600 uppercase tracking-wider px-3">Cadastros</p>

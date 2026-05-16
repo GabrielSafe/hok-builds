@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import type { Hero, ProPlayer } from "@/types";
+import type { Hero, Creator } from "@/types";
 
 interface Counter {
   id: number;
@@ -12,13 +12,13 @@ interface Counter {
   counter_hero_slug: string;
   counter_hero_icon: string | null;
   type: "strong_against" | "weak_against";
-  pro_player_id: number | null;
+  creator_id: number | null;
 }
 
 interface Props {
   heroId: number;
   allHeroes: Hero[];
-  proPlayers: ProPlayer[];
+  proPlayers: Creator[];
 }
 
 const SECTIONS = [
@@ -40,7 +40,7 @@ export default function CountersEditor({ heroId, allHeroes, proPlayers }: Props)
   }
 
   const activeCounters = counters.filter(c =>
-    selectedPlayerId === null ? c.pro_player_id === null : c.pro_player_id === selectedPlayerId
+    selectedPlayerId === null ? c.creator_id === null : c.creator_id === selectedPlayerId
   );
 
   async function addCounter(counter_hero_id: number, type: "strong_against" | "weak_against") {
@@ -50,7 +50,7 @@ export default function CountersEditor({ heroId, allHeroes, proPlayers }: Props)
     await fetch(`/api/admin/heroes/${heroId}/counters`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ counter_hero_id, type, pro_player_id: selectedPlayerId }),
+      body: JSON.stringify({ counter_hero_id, type, creator_id: selectedPlayerId }),
     });
     await loadCounters();
     setSearch(prev => ({ ...prev, [type]: "" }));

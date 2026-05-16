@@ -74,23 +74,32 @@ export interface Skill {
   tags?: string[] | null;
 }
 
-export interface ProPlayer {
+export type CreatorType = "pro_player" | "streamer" | "coach";
+
+export interface Creator {
   id: number;
   name: string;
   slug: string;
+  creator_type: CreatorType;
   main_role: string | null;
   avatar_url: string | null;
   description: string | null;
+  twitch_url: string | null;
+  youtube_url: string | null;
+  twitter_url: string | null;
   is_active: boolean;
   created_at: string;
 }
+
+/** @deprecated use Creator */
+export type ProPlayer = Creator;
 
 export interface HeroCounter {
   id: number;
   hero_id: number;
   counter_hero_id: number;
   type: "strong_against" | "weak_against";
-  pro_player_id: number | null;
+  creator_id: number | null;
   counter_hero?: {
     id: number;
     name: string;
@@ -106,8 +115,8 @@ export interface Build {
   description: string | null;
   patch_version: string | null;
   is_recommended: boolean;
-  pro_player_id: number | null;
-  pro_player?: ProPlayer | null;
+  creator_id: number | null;
+  creator?: Creator | null;
   created_at: string;
   updated_at: string;
   items?: BuildItem[];
