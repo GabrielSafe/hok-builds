@@ -1,6 +1,7 @@
 import { query } from "@/lib/db";
 import type { Creator } from "@/types";
 import StreamersShowcase from "@/components/streamers/StreamersShowcase";
+import StreamersHero from "@/components/streamers/StreamersHero";
 
 export const dynamic = "force-dynamic";
 
@@ -26,14 +27,7 @@ export default async function StreamersPage() {
       {/* Hero */}
       <div className="relative overflow-hidden border-b border-dark-700">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-gold-500/5 pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-heading font-black text-white mb-4">
-            Parceiros <span className="text-gold-400">HOK Builds</span>
-          </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Streamers, Pro Players e Coaches que acreditam no projeto, contribuem diariamente para o crescimento da comunidade e levam o HOK Builds para cada vez mais jogadores.
-          </p>
-        </div>
+        <StreamersHero />
       </div>
 
       {/* Streamers */}
