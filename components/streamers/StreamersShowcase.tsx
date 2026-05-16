@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { Twitch, Youtube, Twitter } from "lucide-react";
 import type { Creator, CreatorType } from "@/types";
-
-const LANE_LABELS: Record<string, string> = {
-  top_lane: "Top Lane",
-  jungle:   "Selva",
-  mid:      "Mid",
-  marksman: "Atirador",
-  support:  "Suporte",
-};
+import { LANE_LABELS } from "@/lib/utils";
 
 const TYPE_BADGE: Record<CreatorType, { label: string; color: string }> = {
   pro_player: { label: "Pro Player", color: "bg-gold-500/30 text-gold-300 border border-gold-500/40" },

@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Upload } from "lucide-react";
 import type { Hero, HeroRole } from "@/types";
+import { ROLE_LABELS } from "@/lib/utils";
 
 const ROLES: HeroRole[] = ["Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support", "Jungle"];
-
-const ROLE_LABELS: Record<HeroRole, string> = {
-  Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
-  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Selva",
-};
 
 interface Props {
   hero?: Hero;
@@ -282,7 +279,7 @@ function ImageUpload({
         <input type="file" accept="image/*" onChange={onChange} className="hidden" />
         <div className="border-2 border-dashed border-dark-500 hover:border-gold-500/50 rounded-lg p-3 transition-colors text-center">
           {preview ? (
-            <img src={preview} alt="preview" className="w-full h-24 object-cover rounded" />
+            <Image src={preview} alt="preview" width={400} height={96} className="w-full h-24 object-cover rounded" />
           ) : (
             <div className="h-24 flex flex-col items-center justify-center gap-2 text-gray-600">
               <Upload size={20} />

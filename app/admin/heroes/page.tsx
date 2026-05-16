@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 import { query } from "@/lib/db";
@@ -47,7 +48,7 @@ export default async function AdminHeroesPage() {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {hero.icon_url ? (
-                      <img src={hero.icon_url} alt={hero.name} className="w-8 h-8 rounded-lg object-cover" />
+                      <Image src={hero.icon_url} alt={hero.name} width={32} height={32} className="w-8 h-8 rounded-lg object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-dark-500 flex items-center justify-center text-xs font-bold text-gold-400">
                         {hero.name[0]}

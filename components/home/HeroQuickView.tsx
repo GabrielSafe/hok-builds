@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, ROLE_LABELS } from "@/lib/utils";
 import type { HeroRole } from "@/types";
 
 interface QuickHero {
@@ -36,10 +36,6 @@ const TIER_COLORS: Record<string, string> = {
   D: "text-red-400",
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  Tank: "Tanque", Fighter: "Lutador", Assassin: "Assassino",
-  Mage: "Mago", Marksman: "Atirador", Support: "Suporte", Jungle: "Selva",
-};
 
 interface Props {
   heroId: number | null;

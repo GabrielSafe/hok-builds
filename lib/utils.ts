@@ -37,6 +37,20 @@ export const ROLE_LABELS: Record<string, string> = {
   Jungle:   "Selva",
 };
 
+export const LANE_LABELS: Record<string, string> = {
+  top_lane: "Top Lane",
+  jungle:   "Selva",
+  mid:      "Mid",
+  marksman: "Atirador",
+  support:  "Suporte",
+};
+
+export const CREATOR_TYPE_LABELS: Record<string, string> = {
+  pro_player: "Pro Player",
+  streamer:   "Streamer",
+  coach:      "Coach",
+};
+
 export function formatRoles(roles: string[]): string {
   return roles.map((r) => ROLE_LABELS[r] ?? r).join(" / ");
 }

@@ -39,8 +39,9 @@ export default function HeroGrid({ onHeroHover }: Props) {
   // Carrega todos os heróis uma única vez
   useEffect(() => {
     fetch("/api/heroes?limit=200")
-      .then(r => r.json())
-      .then((data: Hero[]) => { setAllHeroes(data); setLoading(false); });
+      .then(r => { if (!r.ok) throw new Error("Falha ao carregar heróis"); return r.json(); })
+      .then((data: Hero[]) => { setAllHeroes(data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
   // Filtra e ordena no browser — sem nova requisição

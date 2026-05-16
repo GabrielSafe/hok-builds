@@ -4,6 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { Upload, Trash2, Pencil, X } from "lucide-react";
 import type { Creator, CreatorType } from "@/types";
+import { LANE_LABELS, CREATOR_TYPE_LABELS } from "@/lib/utils";
+
+export { LANE_LABELS, CREATOR_TYPE_LABELS };
 
 const CREATOR_TYPES: { value: CreatorType; label: string; color: string }[] = [
   { value: "pro_player", label: "Pro Player", color: "text-gold-400" },
@@ -18,20 +21,6 @@ const LANES = [
   { value: "marksman", label: "Atirador" },
   { value: "support", label: "Suporte" },
 ];
-
-export const CREATOR_TYPE_LABELS: Record<CreatorType, string> = {
-  pro_player: "Pro Player",
-  streamer: "Streamer",
-  coach: "Coach",
-};
-
-export const LANE_LABELS: Record<string, string> = {
-  top_lane: "Top Lane",
-  jungle: "Selva",
-  mid: "Mid",
-  marksman: "Atirador",
-  support: "Suporte",
-};
 
 const EMPTY_FORM = {
   name: "",

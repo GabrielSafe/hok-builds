@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Upload, Trash2, Eye, EyeOff, Film, ImageIcon } from "lucide-react";
 
 interface BannerMedia {
@@ -130,7 +131,7 @@ export default function BannerMediaManager({ initialMedia }: Props) {
                 <div className="w-20 h-12 rounded-lg overflow-hidden bg-dark-600 border border-dark-500 shrink-0 flex items-center justify-center">
                   {item.type === "video"
                     ? <video src={item.url} className="w-full h-full object-cover" muted />
-                    : <img src={item.url} alt={item.title ?? ""} className="w-full h-full object-cover" />
+                    : <Image src={item.url} alt={item.title ?? ""} fill className="object-cover" sizes="160px" />
                   }
                 </div>
                 <div className="flex-1 min-w-0">

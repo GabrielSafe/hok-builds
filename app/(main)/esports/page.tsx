@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/auth";
 import EsportsHub from "@/components/esports/EsportsHub";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "E-Sports — HOK Builds" };
 
 export default async function EsportsPage() {
