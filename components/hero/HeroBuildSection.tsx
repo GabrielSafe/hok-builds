@@ -89,22 +89,28 @@ const TIER_CONFIG = {
 
 /* ─── Arcana SVG hex grid — layout unificado igual ao jogo ─── */
 
-// 12 colunas, 0=ghost, 1=azul, 2=verde, 3=vermelho — 10 por tier
-const GRID: number[][] = [
-  [1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 3, 3],
-  [1, 1, 0, 0, 2, 2, 2, 0, 0, 3, 3, 0],
-  [1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 3, 3],
-  [1, 1, 0, 0, 2, 2, 2, 0, 0, 3, 3, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+// Grade com formato exato do jogo: 6-7-8-7-8-7-6
+// start = coluna inicial (pode ser 0, 0.5 ou 1.0 — em unidades de coluna)
+// tier = 0 (ghost) por enquanto; posições serão definidas pelo usuário
+const ROWS_DEF = [
+  { start: 1.0, count: 6 },
+  { start: 0.5, count: 7 },
+  { start: 0.0, count: 8 },
+  { start: 0.5, count: 7 },
+  { start: 0.0, count: 8 },
+  { start: 0.5, count: 7 },
+  { start: 1.0, count: 6 },
 ];
 
-const R = 28;        // circumradius — hexagonos maiores
+// Mapa de tier por posição: chave "row-hexIndex" → tier (0=ghost,1=azul,2=verde,3=vermelho)
+// Será preenchido após o usuário confirmar o layout
+const TIER_MAP: Record<string, number> = {};
+
+const R = 28;        // circumradius
 const S3 = Math.sqrt(3);
-const COL_STEP = R * S3;   // horizontal center-to-center
-const ROW_STEP = R * 1.5;  // vertical center-to-center
-const PAD = R + 2;
+const COL_STEP = R * S3;
+const ROW_STEP = R * 1.5;
+const PAD = R + 6;
 
 function hexPts(cx: number, cy: number): string {
   return Array.from({ length: 6 }, (_, i) => {
@@ -114,36 +120,38 @@ function hexPts(cx: number, cy: number): string {
 }
 
 function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
+  // Expande arcanas por tier em slots individuais
   const tierSlots: Record<number, Array<{ name: string; imageUrl: string | null }>> = { 1: [], 2: [], 3: [] };
   arcana.forEach(a => {
     for (let i = 0; i < a.quantity; i++)
       tierSlots[a.arcana_tier]?.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
   });
-
-  if (!arcana.length) return null;
-
   const tierIdx = { 1: 0, 2: 0, 3: 0 };
-  const cols = GRID[0].length;
-  const rows = GRID.length;
-  const svgW = PAD * 2 + COL_STEP * (cols - 1) + COL_STEP / 2;
-  const svgH = PAD * 2 + ROW_STEP * (rows - 1) + R;
 
+  // Gera todos os hexagonos a partir da definição de linhas
   type HexData = { cx: number; cy: number; tier: number; slot: { name: string; imageUrl: string | null } | null; key: string };
   const hexes: HexData[] = [];
 
-  GRID.forEach((row, ri) => {
-    const isOdd = ri % 2 === 1;
-    row.forEach((cell, ci) => {
-      const cx = PAD + ci * COL_STEP + (isOdd ? COL_STEP / 2 : 0);
+  ROWS_DEF.forEach(({ start, count }, ri) => {
+    for (let hi = 0; hi < count; hi++) {
+      const cx = PAD + (start + hi) * COL_STEP;
       const cy = PAD + ri * ROW_STEP;
-      let slot = null;
-      if (cell > 0) {
-        slot = tierSlots[cell]?.[tierIdx[cell as 1|2|3]] ?? null;
-        tierIdx[cell as 1|2|3]++;
+      const key = `${ri}-${hi}`;
+      const tier = TIER_MAP[key] ?? 0;
+      let slot: { name: string; imageUrl: string | null } | null = null;
+      if (tier > 0) {
+        slot = tierSlots[tier]?.[tierIdx[tier as 1|2|3]] ?? null;
+        tierIdx[tier as 1|2|3]++;
       }
-      hexes.push({ cx, cy, tier: cell, slot, key: `${ri}-${ci}` });
-    });
+      hexes.push({ cx, cy, tier, slot, key });
+    }
   });
+
+  // Dimensões do SVG
+  const maxCx = Math.max(...hexes.map(h => h.cx));
+  const maxCy = Math.max(...hexes.map(h => h.cy));
+  const svgW = maxCx + R + PAD;
+  const svgH = maxCy + R + PAD;
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -162,15 +170,14 @@ function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
           if (h.tier === 0) {
             return (
               <polygon key={h.key} points={pts}
-                fill="rgba(255,255,255,0.02)"
-                stroke="rgba(255,255,255,0.08)"
+                fill="rgba(255,255,255,0.03)"
+                stroke="rgba(255,255,255,0.12)"
                 strokeWidth={1} />
             );
           }
 
           const cfg = TIER_CONFIG[h.tier as 1|2|3];
           const hasFill = !!h.slot;
-
           return (
             <g key={h.key}>
               <polygon
@@ -178,10 +185,9 @@ function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
                 fill={hasFill ? cfg.bg : cfg.empty}
                 stroke={cfg.border}
                 strokeWidth={hasFill ? 1.5 : 0.8}
-                strokeOpacity={hasFill ? 0.9 : 0.35}
+                strokeOpacity={hasFill ? 1 : 0.4}
               />
               {hasFill && h.slot?.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
                 <image
                   href={h.slot.imageUrl}
                   x={h.cx - R * S3 / 2}
