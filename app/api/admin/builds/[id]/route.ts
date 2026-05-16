@@ -47,7 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (type === "arcana") {
     const row = await queryOne(
       `INSERT INTO build_arcana (build_id, arcana_id, quantity) VALUES ($1,$2,$3)
-       ON CONFLICT DO NOTHING RETURNING *`,
+       ON CONFLICT (build_id, arcana_id) DO UPDATE SET quantity = EXCLUDED.quantity RETURNING *`,
       [id, data.arcana_id, data.quantity ?? 10]
     );
     return NextResponse.json(row);

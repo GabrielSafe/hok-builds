@@ -87,71 +87,68 @@ const TIER_CONFIG = {
   3: { label: "Vermelho", bg: "#2A0D0D", border: "#EF4444", glow: "rgba(239,68,68,.6)",   empty: "#1f0909" },
 } as const;
 
+const HEX = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+const HEX_SIZE = 52;
+const HEX_GAP = 5;
+const HEX_OFFSET = (HEX_SIZE + HEX_GAP) / 2;
+
 function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
-  // Expand arcanas into individual slots by tier
-  const slots: Array<{ tier: 1|2|3; name: string; imageUrl: string | null } | null> = [];
-
-  [1, 2, 3].forEach(t => {
-    const tierArcana = arcana.filter(a => a.arcana_tier === t);
-    const tierSlots: Array<{ name: string; imageUrl: string | null }> = [];
-    tierArcana.forEach(a => {
-      for (let i = 0; i < a.quantity; i++) {
-        tierSlots.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
-      }
-    });
-    // Pad to 10 slots
-    while (tierSlots.length < 10) tierSlots.push(null as unknown as { name: string; imageUrl: string | null });
-    tierSlots.forEach(s => slots.push(s ? { tier: t as 1|2|3, ...s } : null));
-  });
-
-  const hexStyle = (tier: 1|2|3, filled: boolean): React.CSSProperties => {
-    const cfg = TIER_CONFIG[tier];
-    return {
-      width: 44, height: 44,
-      clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-      background: filled ? cfg.bg : cfg.empty,
-      border: "none",
-      outline: `2px solid ${cfg.border}`,
-      outlineOffset: "-2px",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      overflow: "hidden",
-      cursor: filled ? "pointer" : "default",
-      transition: "all .2s",
-      flexShrink: 0,
-    };
-  };
-
   return (
-    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
       {([1, 2, 3] as const).map(tier => {
         const cfg = TIER_CONFIG[tier];
-        const tierSlots = slots.slice((tier - 1) * 10, tier * 10);
-        const hasSomething = arcana.some(a => a.arcana_tier === tier);
-        if (!hasSomething) return null;
+        const tierArcana = arcana.filter(a => a.arcana_tier === tier);
+        if (tierArcana.length === 0) return null;
+
+        // Expand into 10 individual slots
+        const slots: Array<{ name: string; imageUrl: string | null }> = [];
+        tierArcana.forEach(a => {
+          for (let i = 0; i < a.quantity; i++)
+            slots.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
+        });
+        while (slots.length < 10) slots.push(null as unknown as { name: string; imageUrl: string | null });
+
+        const row1 = slots.slice(0, 5);
+        const row2 = slots.slice(5, 10);
+
+        const renderSlot = (slot: { name: string; imageUrl: string | null } | null, i: number) => (
+          <div
+            key={i}
+            title={slot?.name}
+            style={{
+              width: HEX_SIZE, height: HEX_SIZE, flexShrink: 0,
+              clipPath: HEX,
+              background: slot ? cfg.bg : cfg.empty,
+              boxShadow: slot ? `inset 0 0 0 2px ${cfg.border}` : `inset 0 0 0 2px ${cfg.border}44`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden", cursor: slot ? "pointer" : "default",
+              transition: "filter .2s",
+            }}
+            onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.3) drop-shadow(0 0 8px ${cfg.glow})`; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
+          >
+            {slot?.imageUrl && (
+              <Image src={slot.imageUrl} alt={slot.name} width={HEX_SIZE} height={HEX_SIZE}
+                style={{ width: "100%", height: "100%", objectFit: "cover", clipPath: HEX }} />
+            )}
+            {slot && !slot.imageUrl && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: cfg.border }}>{slot.name[0]}</span>
+            )}
+          </div>
+        );
+
         return (
-          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: cfg.border, fontFamily: "var(--font-montserrat)" }}>
+          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: cfg.border, fontFamily: "var(--font-montserrat)" }}>
               {cfg.label}
             </span>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 44px)", gap: 4 }}>
-              {tierSlots.map((slot, i) => (
-                <div
-                  key={i}
-                  style={hexStyle(tier, !!slot)}
-                  onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `drop-shadow(0 0 6px ${cfg.glow})`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
-                  title={slot?.name}
-                >
-                  {slot?.imageUrl && (
-                    <Image src={slot.imageUrl} alt={slot.name} width={36} height={36}
-                      style={{ width: "100%", height: "100%", objectFit: "cover",
-                        clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
-                  )}
-                  {slot && !slot.imageUrl && (
-                    <span style={{ fontSize: 10, fontWeight: 700, color: cfg.border }}>{slot.name[0]}</span>
-                  )}
-                </div>
-              ))}
+            {/* Row 1 — 5 hexagonos */}
+            <div style={{ display: "flex", gap: HEX_GAP }}>
+              {row1.map((s, i) => renderSlot(s, i))}
+            </div>
+            {/* Row 2 — 5 hexagonos com offset (honeycomb) */}
+            <div style={{ display: "flex", gap: HEX_GAP, marginLeft: HEX_OFFSET, marginTop: -(HEX_SIZE * 0.28) }}>
+              {row2.map((s, i) => renderSlot(s, i + 5))}
             </div>
           </div>
         );
