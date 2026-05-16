@@ -111,12 +111,20 @@ export default function AssetManager({ title, apiPath, storageFolder, extraField
 
           {extraFields === "tier" && (
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Tier (1-3)</label>
-              <select value={form.tier} onChange={(e) => setForm({ ...form, tier: parseInt(e.target.value) })} className="input">
-                <option value={1}>Tier 1</option>
-                <option value={2}>Tier 2</option>
-                <option value={3}>Tier 3</option>
-              </select>
+              <label className="block text-xs text-gray-400 mb-1.5">Cor</label>
+              <div className="flex gap-2">
+                {[
+                  { value: 1, label: "Azul",     color: "border-blue-500 bg-blue-500/10 text-blue-400" },
+                  { value: 2, label: "Verde",    color: "border-green-500 bg-green-500/10 text-green-400" },
+                  { value: 3, label: "Vermelho", color: "border-red-500 bg-red-500/10 text-red-400" },
+                ].map(t => (
+                  <button key={t.value} type="button"
+                    onClick={() => setForm({ ...form, tier: t.value })}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${form.tier === t.value ? t.color : "border-dark-500 bg-dark-600 text-gray-500 hover:text-white"}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

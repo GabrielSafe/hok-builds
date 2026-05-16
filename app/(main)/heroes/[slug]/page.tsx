@@ -48,7 +48,7 @@ async function getHeroData(slug: string) {
     query(`SELECT bi.build_id, bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.change_type AS item_change_type
            FROM build_items bi JOIN items i ON i.id=bi.item_id
            WHERE bi.build_id = ANY($1) ORDER BY bi.sort_order ASC`, [buildIds]),
-    query(`SELECT ba.build_id, ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
+    query(`SELECT ba.build_id, ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
            FROM build_arcana ba JOIN arcana a ON a.id=ba.arcana_id
            WHERE ba.build_id = ANY($1)`, [buildIds]),
     query(`SELECT bs.build_id, s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type

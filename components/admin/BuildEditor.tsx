@@ -7,6 +7,106 @@ import { Plus, X, RefreshCw } from "lucide-react";
 interface Asset { id: number; name: string; image_url: string | null; tier?: number; key?: string; }
 interface BuildRow { id: number; name: string; image_url: string | null; phase?: string; quantity?: number; sort_order?: number; item_id?: number; arcana_id?: number; spell_id?: number; skill_id?: number; }
 
+const TIER_INFO = {
+  1: { label: "Azul",     border: "border-blue-500",  text: "text-blue-400",  bg: "bg-blue-500/10"  },
+  2: { label: "Verde",    border: "border-green-500", text: "text-green-400", bg: "bg-green-500/10" },
+  3: { label: "Vermelho", border: "border-red-500",   text: "text-red-400",   bg: "bg-red-500/10"   },
+} as const;
+
+function ArcanaEditorSection({
+  arcana, availableArcana, onAdd, onRemove,
+}: {
+  arcana: BuildRow[];
+  availableArcana: Asset[];
+  onAdd: (arcana_id: number, quantity: number) => void;
+  onRemove: (id: number) => void;
+}) {
+  const [qty, setQty] = useState<Record<number, number>>({});
+
+  const usedPerTier = (tier: number) =>
+    arcana.filter(a => {
+      const avail = availableArcana.find(av => av.id === a.arcana_id);
+      return avail?.tier === tier;
+    }).reduce((s, a) => s + (a.quantity ?? 0), 0);
+
+  return (
+    <Section title="Arcana">
+      {([1, 2, 3] as const).map(tier => {
+        const info = TIER_INFO[tier];
+        const tierArcana = arcana.filter(a => availableArcana.find(av => av.id === a.arcana_id)?.tier === tier);
+        const used = usedPerTier(tier);
+        const remaining = 10 - used;
+        const available = availableArcana.filter(a => a.tier === tier);
+
+        return (
+          <div key={tier} className={`rounded-xl border p-4 mb-4 ${info.border} ${info.bg}`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className={`text-xs font-bold uppercase tracking-wider ${info.text}`}>{info.label}</p>
+              <span className="text-[10px] text-gray-500">
+                {used}/10 slots usados {remaining > 0 && <span className={info.text}>({remaining} restando)</span>}
+              </span>
+            </div>
+
+            {/* Arcanas já adicionadas nesse tier */}
+            {tierArcana.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {tierArcana.map(a => (
+                  <div key={a.id} className="relative group flex flex-col items-center">
+                    <div className={`w-11 h-11 rounded-full border overflow-hidden bg-dark-700 ${info.border}`}>
+                      {a.image_url
+                        ? <Image src={a.image_url} alt={a.name} width={44} height={44} className="object-cover w-full h-full" />
+                        : <div className={`w-full h-full flex items-center justify-center text-xs ${info.text}`}>{a.name[0]}</div>}
+                    </div>
+                    <span className="text-[9px] text-gray-400">{a.quantity}x</span>
+                    <button onClick={() => onRemove(a.id)}
+                      className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={10} className="text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Disponíveis para adicionar */}
+            {remaining > 0 && (
+              <>
+                <p className="text-[10px] text-gray-600 mb-2">Clique + quantidade para adicionar:</p>
+                <div className="flex flex-wrap gap-2">
+                  {available.map(a => {
+                    const alreadyIn = arcana.find(r => r.arcana_id === a.id);
+                    if (alreadyIn) return null;
+                    const q = qty[a.id] ?? 1;
+                    return (
+                      <div key={a.id} className="flex flex-col items-center gap-1">
+                        <div className={`w-11 h-11 rounded-full border overflow-hidden bg-dark-700 ${info.border} opacity-70`}>
+                          {a.image_url
+                            ? <Image src={a.image_url} alt={a.name} width={44} height={44} className="object-cover w-full h-full" />
+                            : <div className={`w-full h-full flex items-center justify-center text-xs ${info.text}`}>{a.name[0]}</div>}
+                        </div>
+                        <span className="text-[9px] text-gray-500 text-center max-w-[48px] truncate">{a.name}</span>
+                        <div className="flex items-center gap-1">
+                          <input type="number" min={1} max={remaining} value={q}
+                            onChange={e => setQty(prev => ({ ...prev, [a.id]: Math.min(remaining, Math.max(1, parseInt(e.target.value) || 1)) }))}
+                            className="w-10 text-center text-xs bg-dark-600 border border-dark-500 rounded px-1 py-0.5 text-white" />
+                          <button onClick={() => onAdd(a.id, q)}
+                            className={`w-6 h-6 rounded flex items-center justify-center text-dark-900 font-bold transition-colors ${info.bg} ${info.border} border`}>
+                            <Plus size={12} className={info.text} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+            {remaining === 0 && <p className="text-[10px] text-gray-600">10 slots preenchidos ✓</p>}
+          </div>
+        );
+      })}
+    </Section>
+  );
+}
+
 interface Props {
   buildId: number;
   availableItems: Asset[];
@@ -133,40 +233,12 @@ export default function BuildEditor({ buildId, availableItems, availableArcana, 
       </Section>
 
       {/* ARCANA */}
-      <Section title="Arcana">
-        <div className="flex flex-wrap gap-2 mb-4 min-h-[56px] p-3 bg-dark-600 rounded-lg border border-dark-500">
-          {arcana.length === 0
-            ? <p className="text-xs text-gray-600 self-center">Nenhuma arcana adicionada</p>
-            : arcana.map((a) => (
-              <div key={a.id} className="relative group flex flex-col items-center">
-                <div className="w-11 h-11 rounded-full border border-dark-500 overflow-hidden bg-dark-700">
-                  {a.image_url
-                    ? <Image src={a.image_url} alt={a.name} width={44} height={44} className="object-cover w-full h-full" />
-                    : <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">{a.name[0]}</div>
-                  }
-                </div>
-                <span className="text-[9px] text-gray-400">{a.quantity}x</span>
-                <button onClick={() => remove("arcana", a.id)}
-                  className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X size={10} className="text-white" />
-                </button>
-              </div>
-            ))
-          }
-        </div>
-        <p className="text-xs text-gray-500 mb-2">Clique para adicionar (10x cada):</p>
-        <div className="flex flex-wrap gap-2">
-          {availableArcana.map((a) => (
-            <button key={a.id} onClick={() => add("arcana", { arcana_id: a.id, quantity: 10 })}
-              className="group relative w-11 h-11 rounded-full border border-dark-500 overflow-hidden bg-dark-600 hover:border-gold-500 transition-colors">
-              {a.image_url
-                ? <Image src={a.image_url} alt={a.name} width={44} height={44} className="object-cover w-full h-full" />
-                : <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">{a.name[0]}</div>
-              }
-            </button>
-          ))}
-        </div>
-      </Section>
+      <ArcanaEditorSection
+        arcana={arcana}
+        availableArcana={availableArcana}
+        onAdd={(arcana_id, quantity) => add("arcana", { arcana_id, quantity })}
+        onRemove={(id) => remove("arcana", id)}
+      />
 
       {/* SPELLS */}
       <Section title="Feitiços">

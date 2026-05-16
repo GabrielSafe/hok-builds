@@ -39,7 +39,7 @@ export async function GET(
          WHERE bi.build_id=$1 ORDER BY bi.sort_order ASC`, [b.id]
       ),
       query(
-        `SELECT ba.quantity, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
+        `SELECT ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
          FROM build_arcana ba JOIN arcana a ON a.id=ba.arcana_id
          WHERE ba.build_id=$1`, [b.id]
       ),

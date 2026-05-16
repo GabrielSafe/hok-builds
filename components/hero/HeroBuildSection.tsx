@@ -5,7 +5,7 @@ import type { Build } from "@/types";
 
 type ChangeType = "buff" | "nerf" | "adjustment" | null;
 interface FlatItem  { item_name: string; item_image_url: string | null; sort_order: number; phase: string; item_change_type?: ChangeType; }
-interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; arcana_change_type?: ChangeType; }
+interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; arcana_tier: number; arcana_change_type?: ChangeType; }
 interface FlatSpell  { spell_name: string; spell_image_url: string | null; spell_change_type?: ChangeType; }
 interface FlatSkill  { skill_name: string; skill_key: string; skill_image_url: string | null; sort_order: number; }
 
@@ -80,31 +80,82 @@ function ItemRing({ name, imageUrl, size = 60, changeType }: { name: string; ima
   );
 }
 
-/* ─── Arcana ring ───────────────────────────────────────── */
-function ArcanaRing({ name, imageUrl, qty, changeType }: { name: string; imageUrl: string | null; qty: number; changeType?: ChangeType }) {
+/* ─── Arcana hexagon grid ───────────────────────────────── */
+const TIER_CONFIG = {
+  1: { label: "Azul",     bg: "#0D1B3E", border: "#3B82F6", glow: "rgba(59,130,246,.6)",  empty: "#0a1630" },
+  2: { label: "Verde",    bg: "#0D2A1A", border: "#22C55E", glow: "rgba(34,197,94,.6)",   empty: "#091f13" },
+  3: { label: "Vermelho", bg: "#2A0D0D", border: "#EF4444", glow: "rgba(239,68,68,.6)",   empty: "#1f0909" },
+} as const;
+
+function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
+  // Expand arcanas into individual slots by tier
+  const slots: Array<{ tier: 1|2|3; name: string; imageUrl: string | null } | null> = [];
+
+  [1, 2, 3].forEach(t => {
+    const tierArcana = arcana.filter(a => a.arcana_tier === t);
+    const tierSlots: Array<{ name: string; imageUrl: string | null }> = [];
+    tierArcana.forEach(a => {
+      for (let i = 0; i < a.quantity; i++) {
+        tierSlots.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
+      }
+    });
+    // Pad to 10 slots
+    while (tierSlots.length < 10) tierSlots.push(null as unknown as { name: string; imageUrl: string | null });
+    tierSlots.forEach(s => slots.push(s ? { tier: t as 1|2|3, ...s } : null));
+  });
+
+  const hexStyle = (tier: 1|2|3, filled: boolean): React.CSSProperties => {
+    const cfg = TIER_CONFIG[tier];
+    return {
+      width: 44, height: 44,
+      clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+      background: filled ? cfg.bg : cfg.empty,
+      border: "none",
+      outline: `2px solid ${cfg.border}`,
+      outlineOffset: "-2px",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      overflow: "hidden",
+      cursor: filled ? "pointer" : "default",
+      transition: "all .2s",
+      flexShrink: 0,
+    };
+  };
+
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div style={{ position: "relative" }}>
-      <IndicatorBadge type={changeType ?? null} />
-      <div
-        style={{
-          width: 54, height: 54, borderRadius: "50%", padding: 3,
-          background: "linear-gradient(135deg,#FACC15 0%,#F0C040 50%,#D4AF37 100%)",
-          boxShadow: "0 0 14px rgba(250,204,21,.5)",
-          transition: "all .2s", cursor: "pointer",
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.12)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)"; }}
-      >
-        <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden", background: "#0B0F17" }}>
-          {imageUrl
-            ? <Image src={imageUrl} alt={name} width={48} height={48} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#FACC15" }}>{name[0]}</div>
-          }
-        </div>
-      </div>
-      </div>
-      <span style={{ fontSize: 10, color: "#A1A1AA", fontFamily: "var(--font-inter)" }}>{qty}x</span>
+    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+      {([1, 2, 3] as const).map(tier => {
+        const cfg = TIER_CONFIG[tier];
+        const tierSlots = slots.slice((tier - 1) * 10, tier * 10);
+        const hasSomething = arcana.some(a => a.arcana_tier === tier);
+        if (!hasSomething) return null;
+        return (
+          <div key={tier} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: cfg.border, fontFamily: "var(--font-montserrat)" }}>
+              {cfg.label}
+            </span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 44px)", gap: 4 }}>
+              {tierSlots.map((slot, i) => (
+                <div
+                  key={i}
+                  style={hexStyle(tier, !!slot)}
+                  onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `drop-shadow(0 0 6px ${cfg.glow})`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
+                  title={slot?.name}
+                >
+                  {slot?.imageUrl && (
+                    <Image src={slot.imageUrl} alt={slot.name} width={36} height={36}
+                      style={{ width: "100%", height: "100%", objectFit: "cover",
+                        clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
+                  )}
+                  {slot && !slot.imageUrl && (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: cfg.border }}>{slot.name[0]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -274,25 +325,23 @@ export default function HeroBuildSection({ build }: { build: Build }) {
         </div>
       )}
 
-      {/* ── ARCANA + SPELLS ── */}
-      {(arcana.length > 0 || spells.length > 0) && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {arcana.length > 0 && (
-            <div style={card}>
-              <div style={cardHeader}><span style={sectionLabel}>Arcana</span></div>
-              <div style={{ padding: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
-                {arcana.map((a, i) => <ArcanaRing key={i} name={a.arcana_name} imageUrl={a.arcana_image_url} qty={a.quantity} changeType={a.arcana_change_type} />)}
-              </div>
-            </div>
-          )}
-          {spells.length > 0 && (
-            <div style={card}>
-              <div style={cardHeader}><span style={sectionLabel}>Feitiços</span></div>
-              <div style={{ padding: 20, display: "flex", gap: 12, alignItems: "flex-end" }}>
-                {spells.map((s, i) => <SpellFrame key={i} name={s.spell_name} imageUrl={s.spell_image_url} changeType={s.spell_change_type} />)}
-              </div>
-            </div>
-          )}
+      {/* ── ARCANA ── */}
+      {arcana.length > 0 && (
+        <div style={card}>
+          <div style={cardHeader}><span style={sectionLabel}>Arcana</span></div>
+          <div style={{ padding: 20 }}>
+            <ArcanaHexGrid arcana={arcana} />
+          </div>
+        </div>
+      )}
+
+      {/* ── SPELLS ── */}
+      {spells.length > 0 && (
+        <div style={card}>
+          <div style={cardHeader}><span style={sectionLabel}>Feitiços</span></div>
+          <div style={{ padding: 20, display: "flex", gap: 12, alignItems: "flex-end" }}>
+            {spells.map((s, i) => <SpellFrame key={i} name={s.spell_name} imageUrl={s.spell_image_url} changeType={s.spell_change_type} />)}
+          </div>
         </div>
       )}
 
