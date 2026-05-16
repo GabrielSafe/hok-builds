@@ -44,27 +44,29 @@ async function getHeroData(slug: string) {
 
   const buildIds = buildsRaw.map(b => b.id);
 
+  type WithBuildId = { build_id: number };
+
   const [allItems, allArcana, allSpells, allSkillOrder] = await Promise.all([
-    query(`SELECT bi.build_id, bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.change_type AS item_change_type
+    query<WithBuildId>(`SELECT bi.build_id, bi.sort_order, bi.phase, i.name AS item_name, i.image_url AS item_image_url, i.change_type AS item_change_type
            FROM build_items bi JOIN items i ON i.id=bi.item_id
            WHERE bi.build_id = ANY($1) ORDER BY bi.sort_order ASC`, [buildIds]),
-    query(`SELECT ba.build_id, ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
+    query<WithBuildId>(`SELECT ba.build_id, ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
            FROM build_arcana ba JOIN arcana a ON a.id=ba.arcana_id
            WHERE ba.build_id = ANY($1)`, [buildIds]),
-    query(`SELECT bs.build_id, s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type
+    query<WithBuildId>(`SELECT bs.build_id, s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type
            FROM build_spells bs JOIN spells s ON s.id=bs.spell_id
            WHERE bs.build_id = ANY($1)`, [buildIds]),
-    query(`SELECT bso.build_id, bso.sort_order, sk.name AS skill_name, sk.key AS skill_key, sk.image_url AS skill_image_url
+    query<WithBuildId>(`SELECT bso.build_id, bso.sort_order, sk.name AS skill_name, sk.key AS skill_key, sk.image_url AS skill_image_url
            FROM build_skill_order bso JOIN skills sk ON sk.id=bso.skill_id
            WHERE bso.build_id = ANY($1) ORDER BY bso.sort_order ASC`, [buildIds]),
   ]);
 
   const allBuilds = buildsRaw.map(b => ({
     ...b,
-    items:       allItems.filter((r: { build_id: number }) => r.build_id === b.id),
-    arcana:      allArcana.filter((r: { build_id: number }) => r.build_id === b.id),
-    spells:      allSpells.filter((r: { build_id: number }) => r.build_id === b.id),
-    skill_order: allSkillOrder.filter((r: { build_id: number }) => r.build_id === b.id),
+    items:       allItems.filter(r => r.build_id === b.id),
+    arcana:      allArcana.filter(r => r.build_id === b.id),
+    spells:      allSpells.filter(r => r.build_id === b.id),
+    skill_order: allSkillOrder.filter(r => r.build_id === b.id),
   })) as unknown as RichBuild[];
 
   return { hero, stats, skills, allBuilds, counters };
