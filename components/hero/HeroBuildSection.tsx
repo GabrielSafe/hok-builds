@@ -87,16 +87,8 @@ const TIER_CONFIG = {
   3: { label: "Vermelho", bg: "#2A0D0D", border: "#EF4444", glow: "rgba(239,68,68,.6)",   empty: "#1f0909" },
 } as const;
 
-/* ─── Arcana hex grid — layout unificado igual ao jogo ─── */
+/* ─── Arcana SVG hex grid — layout unificado igual ao jogo ─── */
 
-const HC = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
-const SZ  = 52;   // outer size
-const SZI = 46;   // inner size
-const GAP = 3;    // gap between hexagons
-const PITCH = SZ + GAP;
-
-// Grade que define a posição de cada tier (0 = ghost, 1 = azul, 2 = verde, 3 = vermelho)
-// 6 linhas × 9 colunas — conta exatamente 10 por tier
 const GRID: number[][] = [
   [1, 1, 0, 2, 2, 0, 0, 3, 3],
   [1, 1, 0, 2, 2, 2, 0, 3, 3],
@@ -106,92 +98,107 @@ const GRID: number[][] = [
   [1, 0, 0, 0, 0, 0, 0, 3, 0],
 ];
 
-function Hex({
-  tier, filled, slot,
-}: {
-  tier: 0 | 1 | 2 | 3;
-  filled: boolean;
-  slot: { name: string; imageUrl: string | null } | null;
-}) {
-  const cfg = tier > 0 ? TIER_CONFIG[tier as 1|2|3] : null;
+const R = 23;        // circumradius
+const S3 = Math.sqrt(3);
+const COL_STEP = R * S3;   // horizontal center-to-center
+const ROW_STEP = R * 1.5;  // vertical center-to-center
+const PAD = R + 2;
 
-  // Ghost hexagon (sem tier)
-  if (!cfg) {
-    return (
-      <div style={{ width: SZ, height: SZ, flexShrink: 0 }}>
-        <div style={{ width: SZ, height: SZ, clipPath: HC, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: SZI, height: SZI, clipPath: HC, background: "rgba(0,0,0,0.2)" }} />
-        </div>
-      </div>
-    );
-  }
-
-  const borderColor = filled ? cfg.border : `${cfg.border}55`;
-  const bgColor     = filled ? cfg.bg     : cfg.empty;
-
-  return (
-    <div
-      title={slot?.name}
-      style={{ width: SZ, height: SZ, flexShrink: 0, cursor: slot ? "pointer" : "default", transition: "filter .2s" }}
-      onMouseEnter={e => { if (slot) (e.currentTarget as HTMLDivElement).style.filter = `brightness(1.3) drop-shadow(0 0 8px ${cfg.glow})`; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.filter = "none"; }}
-    >
-      {/* Camada externa = borda */}
-      <div style={{ width: SZ, height: SZ, clipPath: HC, background: borderColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {/* Camada interna = fundo */}
-        <div style={{ width: SZI, height: SZI, clipPath: HC, background: bgColor, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          {slot?.imageUrl && (
-            <Image src={slot.imageUrl} alt={slot.name} width={SZI} height={SZI} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          )}
-          {slot && !slot.imageUrl && (
-            <span style={{ fontSize: 11, fontWeight: 900, color: cfg.border }}>{slot.name[0]}</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+function hexPts(cx: number, cy: number): string {
+  return Array.from({ length: 6 }, (_, i) => {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    return `${(cx + R * Math.cos(a)).toFixed(1)},${(cy + R * Math.sin(a)).toFixed(1)}`;
+  }).join(" ");
 }
 
 function ArcanaHexGrid({ arcana }: { arcana: FlatArcana[] }) {
-  // Expande arcanas por tier em slots individuais
   const tierSlots: Record<number, Array<{ name: string; imageUrl: string | null }>> = { 1: [], 2: [], 3: [] };
   arcana.forEach(a => {
     for (let i = 0; i < a.quantity; i++)
       tierSlots[a.arcana_tier]?.push({ name: a.arcana_name, imageUrl: a.arcana_image_url });
   });
-  const tierIdx: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
 
-  const hasTier = (t: number) => arcana.some(a => a.arcana_tier === t);
-  if (!hasTier(1) && !hasTier(2) && !hasTier(3)) return null;
+  if (!arcana.length) return null;
+
+  const tierIdx = { 1: 0, 2: 0, 3: 0 };
+  const cols = GRID[0].length;
+  const rows = GRID.length;
+  const svgW = PAD * 2 + COL_STEP * (cols - 1) + COL_STEP / 2;
+  const svgH = PAD * 2 + ROW_STEP * (rows - 1) + R;
+
+  type HexData = { cx: number; cy: number; tier: number; slot: { name: string; imageUrl: string | null } | null; key: string };
+  const hexes: HexData[] = [];
+
+  GRID.forEach((row, ri) => {
+    const isOdd = ri % 2 === 1;
+    row.forEach((cell, ci) => {
+      const cx = PAD + ci * COL_STEP + (isOdd ? COL_STEP / 2 : 0);
+      const cy = PAD + ri * ROW_STEP;
+      let slot = null;
+      if (cell > 0) {
+        slot = tierSlots[cell]?.[tierIdx[cell as 1|2|3]] ?? null;
+        tierIdx[cell as 1|2|3]++;
+      }
+      hexes.push({ cx, cy, tier: cell, slot, key: `${ri}-${ci}` });
+    });
+  });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 0, alignItems: "flex-start", overflowX: "auto" }}>
-      {GRID.map((row, rowIdx) => {
-        const isOdd = rowIdx % 2 === 1;
-        return (
-          <div
-            key={rowIdx}
-            style={{
-              display: "flex",
-              gap: GAP,
-              marginLeft: isOdd ? PITCH / 2 : 0,
-              marginTop: rowIdx === 0 ? 0 : -(SZ * 0.25),
-            }}
-          >
-            {row.map((cell, colIdx) => {
-              const tier = cell as 0 | 1 | 2 | 3;
-              let slot: { name: string; imageUrl: string | null } | null = null;
-              let filled = false;
-              if (tier > 0) {
-                const s = tierSlots[tier][tierIdx[tier]];
-                if (s) { slot = s; filled = true; }
-                tierIdx[tier]++;
-              }
-              return <Hex key={colIdx} tier={tier} filled={filled} slot={slot} />;
-            })}
-          </div>
-        );
-      })}
+    <div style={{ overflowX: "auto" }}>
+      <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
+        <defs>
+          {hexes.filter(h => h.slot?.imageUrl).map(h => (
+            <clipPath key={`cp-${h.key}`} id={`cp-${h.key}`}>
+              <polygon points={hexPts(h.cx, h.cy)} />
+            </clipPath>
+          ))}
+        </defs>
+
+        {hexes.map(h => {
+          const pts = hexPts(h.cx, h.cy);
+
+          if (h.tier === 0) {
+            return (
+              <polygon key={h.key} points={pts}
+                fill="rgba(255,255,255,0.02)"
+                stroke="rgba(255,255,255,0.08)"
+                strokeWidth={1} />
+            );
+          }
+
+          const cfg = TIER_CONFIG[h.tier as 1|2|3];
+          const hasFill = !!h.slot;
+
+          return (
+            <g key={h.key}>
+              <polygon
+                points={pts}
+                fill={hasFill ? cfg.bg : cfg.empty}
+                stroke={cfg.border}
+                strokeWidth={hasFill ? 1.5 : 0.8}
+                strokeOpacity={hasFill ? 0.9 : 0.35}
+              />
+              {hasFill && h.slot?.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <image
+                  href={h.slot.imageUrl}
+                  x={h.cx - R * S3 / 2}
+                  y={h.cy - R}
+                  width={R * S3}
+                  height={R * 2}
+                  clipPath={`url(#cp-${h.key})`}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              )}
+              {hasFill && !h.slot?.imageUrl && (
+                <text x={h.cx} y={h.cy + 4} textAnchor="middle" fill={cfg.border} fontSize={11} fontWeight="bold">
+                  {h.slot!.name[0]}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
