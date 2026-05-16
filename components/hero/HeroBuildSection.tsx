@@ -102,9 +102,23 @@ const ROWS_DEF = [
   { start: 1.0, count: 6 },
 ];
 
-// Mapa de tier por posição: chave "row-hexIndex" → tier (0=ghost,1=azul,2=verde,3=vermelho)
-// Será preenchido após o usuário confirmar o layout
-const TIER_MAP: Record<string, number> = {};
+// Mapa de tier: "row-hexIndex" → 1=azul, 2=verde, 3=vermelho, ausente=ghost
+// Linha 0 (6): B B _ R R _
+// Linha 1 (7): B B _ _ R R _
+// Linha 2 (8): B _ G G _ _ _ R
+// Linha 3 (7): B _ G G G _ R
+// Linha 4 (8): B _ G G G _ _ R
+// Linha 5 (7): B _ G G _ _ R
+// Linha 6 (6): B B _ R R _
+const TIER_MAP: Record<string, number> = {
+  "0-0":1,"0-1":1,"0-3":3,"0-4":3,
+  "1-0":1,"1-1":1,"1-4":3,"1-5":3,
+  "2-0":1,"2-2":2,"2-3":2,"2-7":3,
+  "3-0":1,"3-2":2,"3-3":2,"3-4":2,"3-6":3,
+  "4-0":1,"4-2":2,"4-3":2,"4-4":2,"4-7":3,
+  "5-0":1,"5-2":2,"5-3":2,"5-6":3,
+  "6-0":1,"6-1":1,"6-3":3,"6-4":3,
+};
 
 const R = 28;        // circumradius
 const S3 = Math.sqrt(3);
