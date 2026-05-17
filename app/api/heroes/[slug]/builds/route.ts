@@ -39,9 +39,12 @@ export async function GET(
          WHERE bi.build_id=$1 ORDER BY bi.sort_order ASC`, [b.id]
       ),
       query(
-        `SELECT ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type
+        `SELECT ba.quantity, a.tier AS arcana_tier, a.name AS arcana_name, a.image_url AS arcana_image_url, a.change_type AS arcana_change_type,
+         COALESCE(json_agg(json_build_object('stat_name',aa.stat_name,'value',aa.value,'is_percent',aa.is_percent)) FILTER (WHERE aa.id IS NOT NULL), '[]') AS attributes
          FROM build_arcana ba JOIN arcana a ON a.id=ba.arcana_id
-         WHERE ba.build_id=$1`, [b.id]
+         LEFT JOIN arcana_attributes aa ON aa.arcana_id=a.id
+         WHERE ba.build_id=$1
+         GROUP BY ba.quantity, a.tier, a.name, a.image_url, a.change_type`, [b.id]
       ),
       query(
         `SELECT s.name AS spell_name, s.image_url AS spell_image_url, s.change_type AS spell_change_type

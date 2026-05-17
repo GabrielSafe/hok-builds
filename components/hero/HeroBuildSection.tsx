@@ -5,7 +5,8 @@ import type { Build } from "@/types";
 
 type ChangeType = "buff" | "nerf" | "adjustment" | null;
 interface FlatItem  { item_name: string; item_image_url: string | null; sort_order: number; phase: string; item_change_type?: ChangeType; }
-interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; arcana_tier: number; arcana_change_type?: ChangeType; }
+interface ArcanaAttr { stat_name: string; value: number; is_percent: boolean; }
+interface FlatArcana { arcana_name: string; arcana_image_url: string | null; quantity: number; arcana_tier: number; arcana_change_type?: ChangeType; attributes?: ArcanaAttr[]; }
 interface FlatSpell  { spell_name: string; spell_image_url: string | null; spell_change_type?: ChangeType; }
 interface FlatSkill  { skill_name: string; skill_key: string; skill_image_url: string | null; sort_order: number; }
 
@@ -300,6 +301,55 @@ function SpellFrame({ name, imageUrl, changeType }: { name: string; imageUrl: st
   );
 }
 
+/* ─── Arcana Stats Panel ────────────────────────────────── */
+function ArcanaStatsPanel({ arcana }: { arcana: FlatArcana[] }) {
+  // Calcula total de cada stat: soma (value × quantity) por arcana
+  const statsMap: Record<string, { value: number; is_percent: boolean }> = {};
+
+  arcana.forEach(a => {
+    const attrs = (a.attributes ?? []) as ArcanaAttr[];
+    attrs.forEach(attr => {
+      const key = attr.stat_name;
+      if (!statsMap[key]) statsMap[key] = { value: 0, is_percent: attr.is_percent };
+      statsMap[key].value += attr.value * a.quantity;
+    });
+  });
+
+  const stats = Object.entries(statsMap).sort((a, b) => a[0].localeCompare(b[0]));
+  if (stats.length === 0) return null;
+
+  return (
+    <div style={{
+      minWidth: 200,
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid #27272A",
+      borderRadius: 10,
+      padding: "14px 16px",
+      flex: 1,
+    }}>
+      <p style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+        textTransform: "uppercase", color: "#FACC15",
+        fontFamily: "var(--font-montserrat)", marginBottom: 12,
+      }}>
+        Atributos Totais
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {stats.map(([name, stat]) => (
+          <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ fontSize: 12, color: "#A1A1AA", fontFamily: "var(--font-inter)" }}>{name}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#FACC15", fontFamily: "var(--font-inter)", whiteSpace: "nowrap" }}>
+              +{stat.is_percent
+                ? `${(Math.round(stat.value * 100) / 100).toString().replace(".", ",")}%`
+                : (Math.round(stat.value * 100) / 100).toString().replace(".", ",")}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main component ────────────────────────────────────── */
 export default function HeroBuildSection({ build }: { build: Build }) {
   const items      = (build.items       ?? []) as unknown as FlatItem[];
@@ -395,8 +445,9 @@ export default function HeroBuildSection({ build }: { build: Build }) {
       {arcana.length > 0 && (
         <div style={card}>
           <div style={cardHeader}><span style={sectionLabel}>Arcana</span></div>
-          <div style={{ padding: 20 }}>
+          <div style={{ padding: 20, display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
             <ArcanaHexGrid arcana={arcana} />
+            <ArcanaStatsPanel arcana={arcana} />
           </div>
         </div>
       )}
